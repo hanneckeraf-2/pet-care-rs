@@ -1,48 +1,59 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import ComingSoon from './components/ComingSoon';
+import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
+import Entrar from './pages/auth/Entrar';
+import Cadastro from './pages/auth/Cadastro';
+import RecuperarSenha from './pages/auth/RecuperarSenha';
+import RedefinirSenha from './pages/auth/RedefinirSenha';
+import Perfil from './pages/usuario/Perfil';
+import Configuracoes from './pages/usuario/Configuracoes';
 
 // Rotas do mapa do site (Trabalho Final, etapa 2). Páginas "ComingSoon" serão implementadas nas próximas fases.
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route index element={<Home />} />
+      <AuthProvider>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index element={<Home />} />
 
-          {/* Animais */}
-          <Route path="animais" element={<ComingSoon title="Animais para adoção" />} />
-          <Route path="animais/:id" element={<ComingSoon title="Detalhes do animal" />} />
-          <Route path="desaparecidos" element={<ComingSoon title="Animais desaparecidos" />} />
-          <Route path="desaparecidos/novo" element={<ComingSoon title="Registrar animal desaparecido" />} />
+            {/* Animais */}
+            <Route path="animais" element={<ComingSoon title="Animais para adoção" />} />
+            <Route path="animais/:id" element={<ComingSoon title="Detalhes do animal" />} />
+            <Route path="desaparecidos" element={<ComingSoon title="Animais desaparecidos" />} />
+            <Route path="desaparecidos/novo" element={<ComingSoon title="Registrar animal desaparecido" />} />
 
-          {/* Organizações e voluntariado */}
-          <Route path="organizacoes" element={<ComingSoon title="Organizações" />} />
-          <Route path="organizacoes/:id" element={<ComingSoon title="Página da organização" />} />
-          <Route path="voluntariado" element={<ComingSoon title="Vagas de voluntariado" />} />
+            {/* Organizações e voluntariado */}
+            <Route path="organizacoes" element={<ComingSoon title="Organizações" />} />
+            <Route path="organizacoes/:id" element={<ComingSoon title="Página da organização" />} />
+            <Route path="voluntariado" element={<ComingSoon title="Vagas de voluntariado" />} />
 
-          {/* Área do usuário */}
-          <Route path="entrar" element={<ComingSoon title="Entrar" />} />
-          <Route path="cadastro" element={<ComingSoon title="Criar conta" />} />
-          <Route path="recuperar-senha" element={<ComingSoon title="Recuperar senha" />} />
-          <Route path="perfil" element={<ComingSoon title="Meu perfil" />} />
-          <Route path="configuracoes" element={<ComingSoon title="Configurações da conta" />} />
-          <Route path="notificacoes" element={<ComingSoon title="Notificações" />} />
+            {/* Área do usuário */}
+            <Route path="entrar" element={<Entrar />} />
+            <Route path="cadastro" element={<Cadastro />} />
+            <Route path="recuperar-senha" element={<RecuperarSenha />} />
+            <Route path="redefinir-senha" element={<RedefinirSenha />} />
+            <Route path="perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
+            <Route path="configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
+            <Route path="notificacoes" element={<ProtectedRoute><ComingSoon title="Notificações" /></ProtectedRoute>} />
 
-          {/* Administração da organização */}
-          <Route path="admin" element={<ComingSoon title="Painel da organização" />} />
-          <Route path="admin/animais" element={<ComingSoon title="Gerenciar animais" />} />
-          <Route path="admin/adocoes" element={<ComingSoon title="Solicitações de adoção" />} />
-          <Route path="admin/voluntariado" element={<ComingSoon title="Gerenciar voluntários" />} />
-          <Route path="admin/perfil" element={<ComingSoon title="Perfil da organização" />} />
-          <Route path="admin/relatorios" element={<ComingSoon title="Relatórios" />} />
+            {/* Administração da organização */}
+            <Route path="admin" element={<ProtectedRoute admin><ComingSoon title="Painel da organização" /></ProtectedRoute>} />
+            <Route path="admin/animais" element={<ProtectedRoute admin><ComingSoon title="Gerenciar animais" /></ProtectedRoute>} />
+            <Route path="admin/adocoes" element={<ProtectedRoute admin><ComingSoon title="Solicitações de adoção" /></ProtectedRoute>} />
+            <Route path="admin/voluntariado" element={<ProtectedRoute admin><ComingSoon title="Gerenciar voluntários" /></ProtectedRoute>} />
+            <Route path="admin/perfil" element={<ProtectedRoute admin><ComingSoon title="Perfil da organização" /></ProtectedRoute>} />
+            <Route path="admin/relatorios" element={<ProtectedRoute admin><ComingSoon title="Relatórios" /></ProtectedRoute>} />
 
-          <Route path="contato" element={<ComingSoon title="Contato" />} />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
+            <Route path="contato" element={<ComingSoon title="Contato" />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

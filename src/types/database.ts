@@ -269,6 +269,7 @@ export type Database = {
       organizacao_do_usuario: { Args: Record<string, never>; Returns: number };
       is_admin_org: { Args: { org_id: number }; Returns: boolean };
       pode_gerenciar_animal: { Args: { animal_id: number }; Returns: boolean };
+      excluir_minha_conta: { Args: Record<string, never>; Returns: undefined };
     };
     Enums: {
       tipo_usuario: 'comum' | 'admin_org' | 'admin_sistema';
