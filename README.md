@@ -16,11 +16,13 @@ npm install
 
 ### 2. Criar o projeto no Supabase
 1. Crie uma conta gratuita em https://supabase.com e um novo projeto (região: South America, São Paulo).
-2. Em **Project Settings > API**, copie a *Project URL* e a *anon public key*.
-3. Copie `.env.example` para `.env.local` e preencha com esses dois valores:
+2. Copie a **Project URL**: use o botão **Connect** no topo do painel ou vá em **Project Settings > Data API**. O formato é `https://<project-ref>.supabase.co`.
+3. Copie a chave pública em **Project Settings > API Keys**: a **Publishable key** (`sb_publishable_...`) ou, na aba *Legacy*, a `anon` key.
+   **Nunca** use a *Secret key* nem a `service_role` no front-end.
+4. Copie `.env.example` para `.env.local` e preencha com esses dois valores:
    ```
    VITE_SUPABASE_URL=https://xxxx.supabase.co
-   VITE_SUPABASE_ANON_KEY=eyJ...
+   VITE_SUPABASE_ANON_KEY=sb_publishable_...
    ```
 
 ### 3. Criar o banco de dados
