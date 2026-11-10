@@ -19,3 +19,15 @@ export const FAIXAS_IDADE = [
   { value: 'adulto', label: 'Adulto (3 a 8 anos)' },
   { value: 'idoso', label: 'Idoso (mais de 8 anos)' },
 ] as const;
+
+/** Tipos de atividade das vagas de voluntariado */
+export const ATIVIDADES = [
+  'veterinária',
+  'cuidados',
+  'limpeza',
+  'transporte',
+  'eventos',
+  'comunicação',
+  'lar temporário',
+  'outros',
+] as const;

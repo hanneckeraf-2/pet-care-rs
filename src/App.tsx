@@ -16,6 +16,9 @@ import DetalheAnimal from './pages/animais/DetalheAnimal';
 import ListaDesaparecidos from './pages/desaparecidos/ListaDesaparecidos';
 import NovoDesaparecido from './pages/desaparecidos/NovoDesaparecido';
 import DetalheDesaparecido from './pages/desaparecidos/DetalheDesaparecido';
+import ListaOrganizacoes from './pages/organizacoes/ListaOrganizacoes';
+import PaginaOrganizacao from './pages/organizacoes/PaginaOrganizacao';
+import ListaVagas from './pages/voluntariado/ListaVagas';
 
 // Rotas do mapa do site (Trabalho Final, etapa 2). Páginas "ComingSoon" serão implementadas nas próximas fases.
 export default function App() {
@@ -34,9 +37,9 @@ export default function App() {
             <Route path="desaparecidos/:id" element={<DetalheDesaparecido />} />
 
             {/* Organizações e voluntariado */}
-            <Route path="organizacoes" element={<ComingSoon title="Organizações" />} />
-            <Route path="organizacoes/:id" element={<ComingSoon title="Página da organização" />} />
-            <Route path="voluntariado" element={<ComingSoon title="Vagas de voluntariado" />} />
+            <Route path="organizacoes" element={<ListaOrganizacoes />} />
+            <Route path="organizacoes/:id" element={<PaginaOrganizacao />} />
+            <Route path="voluntariado" element={<ListaVagas />} />
 
             {/* Área do usuário */}
             <Route path="entrar" element={<Entrar />} />
