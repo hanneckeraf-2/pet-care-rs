@@ -264,13 +264,19 @@ export type Database = {
         Relationships: [];
       };
     };
-    Views: { [_ in never]: never };
+    Views: {
+      vw_adocoes_por_mes: {
+        Row: { id_organizacao: number; mes: string; solicitacoes: number; aprovadas: number };
+        Relationships: [];
+      };
+    };
     Functions: {
       is_admin_sistema: { Args: Record<string, never>; Returns: boolean };
       organizacao_do_usuario: { Args: Record<string, never>; Returns: number };
       is_admin_org: { Args: { org_id: number }; Returns: boolean };
       pode_gerenciar_animal: { Args: { animal_id: number }; Returns: boolean };
       excluir_minha_conta: { Args: Record<string, never>; Returns: undefined };
+      decidir_adocao: { Args: { p_id: number; p_aprovar: boolean; p_observacao?: string | null }; Returns: undefined };
     };
     Enums: {
       tipo_usuario: 'comum' | 'admin_org' | 'admin_sistema';

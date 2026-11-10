@@ -128,3 +128,6 @@ export async function buscarDesaparecidos(filtros: FiltrosDesaparecidos, pagina:
   const inicio = (pagina - 1) * POR_PAGINA;
   return query.order('criado_em', { ascending: false }).range(inicio, inicio + POR_PAGINA - 1);
 }
+
+/** Status que uma organização pode atribuir aos seus animais */
+export const STATUS_EDITAVEIS_ORG: Enums<'status_animal'>[] = ['disponivel', 'em_processo', 'adotado', 'resgatado', 'encontrado', 'reunido'];

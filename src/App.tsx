@@ -19,6 +19,14 @@ import DetalheDesaparecido from './pages/desaparecidos/DetalheDesaparecido';
 import ListaOrganizacoes from './pages/organizacoes/ListaOrganizacoes';
 import PaginaOrganizacao from './pages/organizacoes/PaginaOrganizacao';
 import ListaVagas from './pages/voluntariado/ListaVagas';
+import AdminLayout from './pages/admin/AdminLayout';
+import Dashboard from './pages/admin/Dashboard';
+import AdminAnimais from './pages/admin/AdminAnimais';
+import AnimalForm from './pages/admin/AnimalForm';
+import AdminAdocoes from './pages/admin/AdminAdocoes';
+import AdminVoluntariado from './pages/admin/AdminVoluntariado';
+import AdminPerfil from './pages/admin/AdminPerfil';
+import AdminRelatorios from './pages/admin/AdminRelatorios';
 
 // Rotas do mapa do site (Trabalho Final, etapa 2). Páginas "ComingSoon" serão implementadas nas próximas fases.
 export default function App() {
@@ -51,12 +59,16 @@ export default function App() {
             <Route path="notificacoes" element={<ProtectedRoute><ComingSoon title="Notificações" /></ProtectedRoute>} />
 
             {/* Administração da organização */}
-            <Route path="admin" element={<ProtectedRoute admin><ComingSoon title="Painel da organização" /></ProtectedRoute>} />
-            <Route path="admin/animais" element={<ProtectedRoute admin><ComingSoon title="Gerenciar animais" /></ProtectedRoute>} />
-            <Route path="admin/adocoes" element={<ProtectedRoute admin><ComingSoon title="Solicitações de adoção" /></ProtectedRoute>} />
-            <Route path="admin/voluntariado" element={<ProtectedRoute admin><ComingSoon title="Gerenciar voluntários" /></ProtectedRoute>} />
-            <Route path="admin/perfil" element={<ProtectedRoute admin><ComingSoon title="Perfil da organização" /></ProtectedRoute>} />
-            <Route path="admin/relatorios" element={<ProtectedRoute admin><ComingSoon title="Relatórios" /></ProtectedRoute>} />
+            <Route path="admin" element={<ProtectedRoute admin><AdminLayout /></ProtectedRoute>}>
+              <Route index element={<Dashboard />} />
+              <Route path="animais" element={<AdminAnimais />} />
+              <Route path="animais/novo" element={<AnimalForm />} />
+              <Route path="animais/:id/editar" element={<AnimalForm />} />
+              <Route path="adocoes" element={<AdminAdocoes />} />
+              <Route path="voluntariado" element={<AdminVoluntariado />} />
+              <Route path="perfil" element={<AdminPerfil />} />
+              <Route path="relatorios" element={<AdminRelatorios />} />
+            </Route>
 
             <Route path="contato" element={<ComingSoon title="Contato" />} />
             <Route path="*" element={<NotFound />} />

@@ -12,6 +12,9 @@ const traducoes: [RegExp, string][] = [
   [/duplicate key/i, 'Este registro já existe.'],
   [/row-level security|permission denied/i, 'Você não tem permissão para realizar esta ação.'],
   [/jwt expired|session.*(missing|expired)/i, 'Sua sessão expirou. Entre novamente.'],
+  // mensagens das funções SQL do projeto (já em português)
+  [/não está mais em análise/i, 'Esta solicitação já foi decidida. Atualize a página.'],
+  [/não encontrada ou sem permissão/i, 'Solicitação não encontrada ou você não tem permissão.'],
 ];
 
 export function traduzirErro(erro: unknown): string {
