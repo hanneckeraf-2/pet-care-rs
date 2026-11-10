@@ -37,9 +37,9 @@ Escolha uma das opções abaixo.
 ```bash
 npx supabase login
 npx supabase link --project-ref <id-do-projeto>
-npx supabase db push
+npx supabase db push --remote --include-seed
 ```
-Depois rode o `supabase/seed.sql` no SQL Editor.
+Sem `--remote`, a CLI tenta um banco local no Docker (`127.0.0.1:54322`). O `--include-seed` também aplica o `supabase/seed.sql`.
 
 ### 4. Rodar o site
 ```bash
