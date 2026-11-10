@@ -21,6 +21,7 @@ export const STATUS_ANIMAL: Record<Enums<'status_animal'>, { label: string; cor:
   perdido: { label: 'Perdido', cor: 'bg-red-100 text-red-800' },
   encontrado: { label: 'Encontrado', cor: 'bg-blue-100 text-blue-800' },
   resgatado: { label: 'Resgatado', cor: 'bg-orange-100 text-orange-800' },
+  reunido: { label: 'Voltou para casa', cor: 'bg-emerald-100 text-emerald-800' },
 };
 
 export const DISPONIBILIDADE: Record<Enums<'disponibilidade'>, string> = {

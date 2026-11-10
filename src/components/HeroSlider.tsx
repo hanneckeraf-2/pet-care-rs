@@ -39,7 +39,7 @@ const slides: Slide[] = [
     image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=1920',
     actions: [
       { label: 'Reportar Desaparecimento', to: '/desaparecidos/novo' },
-      { label: 'Procurar Desaparecidos', to: '/desaparecidos' },
+      { label: 'Reportar Pet Encontrado', to: '/desaparecidos/novo?tipo=encontrado' },
     ],
   },
   {

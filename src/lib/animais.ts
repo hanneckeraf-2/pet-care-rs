@@ -93,3 +93,38 @@ export async function buscarAnimaisParaAdocao(filtros: FiltrosAnimais, pagina: n
     .order('criado_em', { ascending: false })
     .range(inicio, inicio + POR_PAGINA - 1);
 }
+
+export const STATUS_DESAPARECIDOS = ['perdido', 'encontrado', 'resgatado'] as const;
+
+export type FiltrosDesaparecidos = {
+  q?: string;
+  tipo?: string; // perdido | encontrado | resgatado | reunido
+  especie?: string;
+  cidade?: string;
+};
+
+export async function buscarDesaparecidos(filtros: FiltrosDesaparecidos, pagina: number) {
+  const statusValidos = [...STATUS_DESAPARECIDOS, 'reunido'] as string[];
+  const status: Enums<'status_animal'>[] =
+    filtros.tipo && statusValidos.includes(filtros.tipo)
+      ? [filtros.tipo as Enums<'status_animal'>]
+      : [...STATUS_DESAPARECIDOS];
+
+  let query = supabase
+    .from('animal')
+    .select(ANIMAL_CARD_SELECT, { count: 'exact' })
+    .in('status', status); // inclui animais resgatados cadastrados por organizações
+
+  if (filtros.especie) query = query.eq('especie', filtros.especie as Enums<'especie'>);
+  if (filtros.cidade) query = query.eq('cidade', filtros.cidade);
+
+  const termo = filtros.q ? limparTermo(filtros.q) : '';
+  if (termo) {
+    query = query.or(
+      `nome.ilike.%${termo}%,raca.ilike.%${termo}%,descricao.ilike.%${termo}%,local.ilike.%${termo}%,ultimo_local_visto.ilike.%${termo}%`
+    );
+  }
+
+  const inicio = (pagina - 1) * POR_PAGINA;
+  return query.order('criado_em', { ascending: false }).range(inicio, inicio + POR_PAGINA - 1);
+}

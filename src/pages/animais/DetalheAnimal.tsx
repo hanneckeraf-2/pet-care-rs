@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import type { QueryData } from '@supabase/supabase-js';
 import { ArrowLeft, Building2, Calendar, CheckCircle2, Heart, Mail, MapPin, PawPrint, Phone, Ruler, Tag } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -72,6 +72,10 @@ export default function DetalheAnimal() {
   if (carregando) return <Spinner />;
   if (erro) return <div className="container mx-auto px-4 py-10"><Alert type="error">{erro}</Alert></div>;
   if (!animal) return <NotFound />;
+  // registros de desaparecidos têm página própria
+  if (['perdido', 'encontrado', 'resgatado', 'reunido'].includes(animal.status)) {
+    return <Navigate to={`/desaparecidos/${animal.id}`} replace />;
+  }
 
   const fotos = animal.foto;
   const disponivelParaAdocao = !!animal.organizacao && (animal.status === 'disponivel' || animal.status === 'em_processo');

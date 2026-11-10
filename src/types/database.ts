@@ -206,6 +206,7 @@ export type Database = {
           id_remetente: string;
           mensagem: string;
           contato_retorno: string | null;
+          nome_remetente: string;
           criado_em: string;
         };
         Insert: {
@@ -276,7 +277,7 @@ export type Database = {
       especie: 'cachorro' | 'gato' | 'outro';
       sexo: 'macho' | 'femea' | 'desconhecido';
       porte: 'pequeno' | 'medio' | 'grande';
-      status_animal: 'disponivel' | 'em_processo' | 'adotado' | 'perdido' | 'encontrado' | 'resgatado';
+      status_animal: 'disponivel' | 'em_processo' | 'adotado' | 'perdido' | 'encontrado' | 'resgatado' | 'reunido';
       status_adocao: 'em_analise' | 'aprovada' | 'rejeitada' | 'cancelada';
       disponibilidade: 'dias_uteis' | 'finais_de_semana' | 'flexivel';
       status_vaga: 'aberta' | 'encerrada';

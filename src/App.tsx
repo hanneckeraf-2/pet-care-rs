@@ -13,6 +13,9 @@ import Perfil from './pages/usuario/Perfil';
 import Configuracoes from './pages/usuario/Configuracoes';
 import ListaAnimais from './pages/animais/ListaAnimais';
 import DetalheAnimal from './pages/animais/DetalheAnimal';
+import ListaDesaparecidos from './pages/desaparecidos/ListaDesaparecidos';
+import NovoDesaparecido from './pages/desaparecidos/NovoDesaparecido';
+import DetalheDesaparecido from './pages/desaparecidos/DetalheDesaparecido';
 
 // Rotas do mapa do site (Trabalho Final, etapa 2). Páginas "ComingSoon" serão implementadas nas próximas fases.
 export default function App() {
@@ -26,8 +29,9 @@ export default function App() {
             {/* Animais */}
             <Route path="animais" element={<ListaAnimais />} />
             <Route path="animais/:id" element={<DetalheAnimal />} />
-            <Route path="desaparecidos" element={<ComingSoon title="Animais desaparecidos" />} />
-            <Route path="desaparecidos/novo" element={<ComingSoon title="Registrar animal desaparecido" />} />
+            <Route path="desaparecidos" element={<ListaDesaparecidos />} />
+            <Route path="desaparecidos/novo" element={<ProtectedRoute><NovoDesaparecido /></ProtectedRoute>} />
+            <Route path="desaparecidos/:id" element={<DetalheDesaparecido />} />
 
             {/* Organizações e voluntariado */}
             <Route path="organizacoes" element={<ComingSoon title="Organizações" />} />
