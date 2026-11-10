@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, ArrowRight, HandHeart, Heart, HeartHandshake, PawPrint, Search, ShieldCheck } from 'lucide-react';
 import HeroSlider from '../components/HeroSlider';
 import SearchBar from '../components/SearchBar';
-import PetCard from '../components/PetCard';
-import { mockPets } from '../data/mockPets';
+import PetCard, { PetCardSkeleton } from '../components/PetCard';
+import { supabase } from '../lib/supabase';
+import { ANIMAL_CARD_SELECT, type AnimalCard } from '../lib/animais';
 
 const quickLinks = [
   {
@@ -39,6 +41,19 @@ const motivos = [
 ];
 
 export default function Home() {
+  const [destaques, setDestaques] = useState<AnimalCard[] | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from('animal')
+      .select(ANIMAL_CARD_SELECT)
+      .eq('status', 'disponivel')
+      .not('id_organizacao', 'is', null)
+      .order('criado_em', { ascending: false })
+      .limit(4)
+      .then(({ data }) => setDestaques(data ?? []));
+  }, []);
+
   return (
     <>
       <HeroSlider />
@@ -79,16 +94,9 @@ export default function Home() {
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {mockPets.map((pet) => (
-            <PetCard
-              key={pet.id}
-              to={`/animais/${pet.id}`}
-              nome={pet.nome}
-              subtitulo={pet.raca}
-              detalhe={pet.idade}
-              imagem={pet.imagem}
-            />
-          ))}
+          {destaques === null
+            ? Array.from({ length: 4 }, (_, i) => <PetCardSkeleton key={i} />)
+            : destaques.map((animal) => <PetCard key={animal.id} animal={animal} />)}
         </div>
       </section>
 

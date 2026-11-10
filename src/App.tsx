@@ -11,6 +11,8 @@ import RecuperarSenha from './pages/auth/RecuperarSenha';
 import RedefinirSenha from './pages/auth/RedefinirSenha';
 import Perfil from './pages/usuario/Perfil';
 import Configuracoes from './pages/usuario/Configuracoes';
+import ListaAnimais from './pages/animais/ListaAnimais';
+import DetalheAnimal from './pages/animais/DetalheAnimal';
 
 // Rotas do mapa do site (Trabalho Final, etapa 2). Páginas "ComingSoon" serão implementadas nas próximas fases.
 export default function App() {
@@ -22,8 +24,8 @@ export default function App() {
             <Route index element={<Home />} />
 
             {/* Animais */}
-            <Route path="animais" element={<ComingSoon title="Animais para adoção" />} />
-            <Route path="animais/:id" element={<ComingSoon title="Detalhes do animal" />} />
+            <Route path="animais" element={<ListaAnimais />} />
+            <Route path="animais/:id" element={<DetalheAnimal />} />
             <Route path="desaparecidos" element={<ComingSoon title="Animais desaparecidos" />} />
             <Route path="desaparecidos/novo" element={<ComingSoon title="Registrar animal desaparecido" />} />
 
