@@ -77,7 +77,13 @@ export default function DetalheDesaparecido() {
       .select('id, mensagem, contato_retorno, nome_remetente, criado_em')
       .eq('id_animal', animalId)
       .order('criado_em', { ascending: false })
-      .then(({ data }) => setMensagens(data ?? []));
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Erro ao carregar mensagens', error);
+          setErro(traduzirErro(error));
+        }
+        setMensagens(data ?? []);
+      });
   }, [responsavel, animalId]);
 
   useEffect(() => {
