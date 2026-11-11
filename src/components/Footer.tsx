@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Mail, MapPin, PawPrint, Phone } from 'lucide-react';
+import { Instagram, Mail, MapPin, PawPrint, Phone } from 'lucide-react';
+import { CONTATO } from '../lib/constants';
 import InstalarApp from './InstalarApp';
 
 export default function Footer() {
@@ -40,8 +41,21 @@ export default function Footer() {
         <div>
           <h3 className="text-white font-semibold mb-3">Contato</h3>
           <ul className="space-y-2 text-sm">
-            <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-purple-400" aria-hidden="true" /> (51) 0000-0000</li>
-            <li className="flex items-center gap-2"><Mail className="w-4 h-4 text-purple-400" aria-hidden="true" /> contato@petcarers.org</li>
+            <li>
+              <a href={CONTATO.telefoneLink} className="flex items-center gap-2 hover:text-white">
+                <Phone className="w-4 h-4 text-purple-400" aria-hidden="true" /> {CONTATO.telefone}
+              </a>
+            </li>
+            <li>
+              <a href={`mailto:${CONTATO.email}`} className="flex items-center gap-2 hover:text-white break-all">
+                <Mail className="w-4 h-4 text-purple-400 shrink-0" aria-hidden="true" /> {CONTATO.email}
+              </a>
+            </li>
+            <li>
+              <a href={CONTATO.instagramLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white">
+                <Instagram className="w-4 h-4 text-purple-400" aria-hidden="true" /> {CONTATO.instagram}
+              </a>
+            </li>
             <li className="flex items-center gap-2"><MapPin className="w-4 h-4 text-purple-400" aria-hidden="true" /> Canoas e São Leopoldo/RS</li>
           </ul>
         </div>

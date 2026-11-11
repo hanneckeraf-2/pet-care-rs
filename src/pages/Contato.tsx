@@ -7,6 +7,7 @@ import { Building2, HelpCircle, Instagram, Mail, MapPin, MessageCircle, Send } f
 import { supabase } from '../lib/supabase';
 import { traduzirErro } from '../lib/erros';
 import { useAuth } from '../contexts/AuthContext';
+import { CONTATO } from '../lib/constants';
 import { Alert, Button, Card, Field, Input, Select, Textarea } from '../components/ui';
 
 const ASSUNTOS = [
@@ -119,9 +120,21 @@ export default function Contato() {
           <Card className="!p-5">
             <h2 className="font-semibold text-lg mb-3">Outros canais</h2>
             <ul className="space-y-3 text-gray-700">
-              <li className="flex items-center gap-3"><Mail size={18} className="text-purple-600" aria-hidden="true" /> contato@petcarers.org</li>
-              <li className="flex items-center gap-3"><MessageCircle size={18} className="text-purple-600" aria-hidden="true" /> WhatsApp: (51) 0000-0000</li>
-              <li className="flex items-center gap-3"><Instagram size={18} className="text-purple-600" aria-hidden="true" /> @petcarers</li>
+              <li>
+                <a href={`mailto:${CONTATO.email}`} className="flex items-center gap-3 hover:text-purple-700 break-all">
+                  <Mail size={18} className="text-purple-600 shrink-0" aria-hidden="true" /> {CONTATO.email}
+                </a>
+              </li>
+              <li>
+                <a href={CONTATO.whatsappLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-purple-700">
+                  <MessageCircle size={18} className="text-purple-600" aria-hidden="true" /> WhatsApp: {CONTATO.telefone}
+                </a>
+              </li>
+              <li>
+                <a href={CONTATO.instagramLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-purple-700">
+                  <Instagram size={18} className="text-purple-600" aria-hidden="true" /> {CONTATO.instagram}
+                </a>
+              </li>
               <li className="flex items-center gap-3"><MapPin size={18} className="text-purple-600" aria-hidden="true" /> Canoas e São Leopoldo/RS</li>
             </ul>
             <p className="text-sm text-gray-500 mt-4">
