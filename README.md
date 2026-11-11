@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/hanneckeraf-2/pet-care-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/hanneckeraf-2/pet-care-rs/actions/workflows/ci.yml)
 
-Repositório: https://github.com/hanneckeraf-2/pet-care-rs
+**Site:** https://pet-care-rs.vercel.app · **Repositório:** https://github.com/hanneckeraf-2/pet-care-rs
 
 Site agregador de informações para protetores de animais no Vale do Sinos/RS, com foco em Canoas e São Leopoldo.
 Ele conecta ONGs, abrigos e protetores a adotantes, voluntários, doadores e tutores de animais desaparecidos.
