@@ -1,5 +1,9 @@
 # Pet Care RS
 
+[![CI](https://github.com/hanneckeraf-2/pet-care-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/hanneckeraf-2/pet-care-rs/actions/workflows/ci.yml)
+
+Repositório: https://github.com/hanneckeraf-2/pet-care-rs
+
 Site agregador de informações para protetores de animais no Vale do Sinos/RS, com foco em Canoas e São Leopoldo.
 Ele conecta ONGs, abrigos e protetores a adotantes, voluntários, doadores e tutores de animais desaparecidos.
 
@@ -149,7 +153,6 @@ O requisito não funcional "Segurança de dados/acesso" é atendido assim:
 ## Próximos passos
 
 - **PWA (Progressive Web App):** tornar o site instalável no celular, com Web App Manifest, ícones e Service Worker (via `vite-plugin-pwa`), para melhorar a compatibilidade e a experiência em dispositivos móveis.
-- **GitHub:** publicar o repositório (hoje só local) no GitHub, com o histórico de commits, para versionamento e controle de configuração.
 - Deploy (Vercel ou Netlify, gratuitos), integrado ao repositório do GitHub.
 - Chatbot de orientação (previsto nos requisitos; adiado nesta etapa).
 - Login com Apple e Meta.
