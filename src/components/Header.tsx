@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, LayoutDashboard, LogOut, Menu, PawPrint, Settings, User, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import SinoNotificacoes from './SinoNotificacoes';
 
 const navItems = [
   { to: '/animais', label: 'Adotar' },
@@ -78,7 +79,8 @@ export default function Header() {
           ))}
         </nav>
 
-        <div className="hidden md:block">
+        <div className="hidden md:flex items-center gap-2">
+          {user && <SinoNotificacoes />}
           {user ? (
             <div className="relative" ref={menuRef}>
               <button
@@ -121,14 +123,17 @@ export default function Header() {
           )}
         </div>
 
+        <div className="md:hidden flex items-center gap-1">
+        {user && <SinoNotificacoes />}
         <button
-          className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100"
+          className="p-2 rounded-md text-gray-700 hover:bg-gray-100"
           onClick={() => setOpen((v) => !v)}
           aria-label={open ? 'Fechar menu' : 'Abrir menu'}
           aria-expanded={open}
         >
           {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
+        </div>
       </div>
 
       {open && (
