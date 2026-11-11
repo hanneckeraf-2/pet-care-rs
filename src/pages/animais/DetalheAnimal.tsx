@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import type { QueryData } from '@supabase/supabase-js';
-import { ArrowLeft, Building2, Calendar, CheckCircle2, Heart, Mail, MapPin, PawPrint, Phone, Ruler, Tag } from 'lucide-react';
+import { ArrowLeft, Building2, Calendar, CheckCircle2, Heart, Mail, MapPin, PawPrint, Pencil, Phone, Ruler, Tag } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
 import { ESPECIE_LABEL, PORTE_LABEL, SEXO_LABEL, formatarIdade } from '../../lib/animais';
@@ -28,7 +28,7 @@ type MinhaSolicitacao = { id: number; status: Enums<'status_adocao'>; criado_em:
 export default function DetalheAnimal() {
   const { id } = useParams();
   const animalId = Number(id);
-  const { user } = useAuth();
+  const { user, perfil } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -80,6 +80,8 @@ export default function DetalheAnimal() {
   const fotos = animal.foto;
   const disponivelParaAdocao = !!animal.organizacao && (animal.status === 'disponivel' || animal.status === 'em_processo');
   const solicitacaoAberta = solicitacao?.status === 'em_analise';
+  const gerencia =
+    perfil?.tipo_usuario === 'admin_org' && animal.id_organizacao !== null && perfil.id_organizacao === animal.id_organizacao;
 
   function clicarSolicitar() {
     if (!user) {
@@ -141,6 +143,14 @@ export default function DetalheAnimal() {
             <Badge {...STATUS_ANIMAL[animal.status]} />
           </div>
           <p className="text-gray-500 text-sm mb-6">Cadastrado em {formatarData(animal.criado_em)}</p>
+          {gerencia && (
+            <Link
+              to={`/admin/animais/${animal.id}/editar`}
+              className="inline-flex items-center gap-2 mb-6 border border-purple-300 text-purple-700 px-4 py-2 rounded-md text-sm font-semibold hover:bg-purple-50"
+            >
+              <Pencil size={16} aria-hidden="true" /> Editar este animal
+            </Link>
+          )}
 
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             {caracteristicas.map(({ icon: Icon, label, valor }) => (

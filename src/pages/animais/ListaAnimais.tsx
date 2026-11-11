@@ -1,17 +1,19 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Search, SlidersHorizontal, X } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Plus, Search, SlidersHorizontal, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
 import { CIDADES, ESPECIES, FAIXAS_IDADE } from '../../lib/constants';
 import { POR_PAGINA, PORTE_LABEL, SEXO_LABEL, buscarAnimaisParaAdocao, type AnimalCard, type FiltrosAnimais } from '../../lib/animais';
 import PetCard, { PetCardSkeleton } from '../../components/PetCard';
 import { Alert, Field, Input, Select } from '../../components/ui';
+import { useAuth } from '../../contexts/AuthContext';
 
 const CHAVES_FILTRO = ['q', 'especie', 'idade', 'cidade', 'organizacao', 'porte', 'sexo'] as const;
 
 export default function ListaAnimais() {
   const [params, setParams] = useSearchParams();
+  const { isAdminOrg } = useAuth();
   const [animais, setAnimais] = useState<AnimalCard[]>([]);
   const [total, setTotal] = useState(0);
   const [carregando, setCarregando] = useState(true);
@@ -129,9 +131,19 @@ export default function ListaAnimais() {
 
   return (
     <div className="container mx-auto px-4 py-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Animais para adoção</h1>
-        <p className="text-gray-600">Encontre um novo amigo entre os animais das organizações parceiras do Vale do Sinos.</p>
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Animais para adoção</h1>
+          <p className="text-gray-600">Encontre um novo amigo entre os animais das organizações parceiras do Vale do Sinos.</p>
+        </div>
+        {isAdminOrg && (
+          <Link
+            to="/admin/animais/novo"
+            className="inline-flex items-center justify-center gap-2 bg-purple-600 text-white px-5 py-3 rounded-full font-semibold hover:bg-purple-700 transition shrink-0"
+          >
+            <Plus size={18} aria-hidden="true" /> Cadastrar animal
+          </Link>
+        )}
       </div>
 
       <form onSubmit={buscarTermo} className="flex gap-2 mb-6" role="search">
