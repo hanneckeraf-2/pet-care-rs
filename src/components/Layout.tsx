@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
+import AvisoOffline from './AvisoOffline';
+import AtualizacaoPWA from './AtualizacaoPWA';
 
 export default function Layout() {
   const { pathname } = useLocation();
@@ -19,10 +21,12 @@ export default function Layout() {
         Pular para o conteúdo
       </a>
       <Header />
+      <AvisoOffline />
       <main id="conteudo" className="flex-1">
         <Outlet />
       </main>
       <Footer />
+      <AtualizacaoPWA />
     </div>
   );
 }

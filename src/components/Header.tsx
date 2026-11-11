@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, LayoutDashboard, LogOut, Menu, PawPrint, Settings, User, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import SinoNotificacoes from './SinoNotificacoes';
+import InstalarApp from './InstalarApp';
 
 const navItems = [
   { to: '/animais', label: 'Adotar' },
@@ -143,6 +144,9 @@ export default function Header() {
               {item.label}
             </NavLink>
           ))}
+          <div className="px-3 py-2">
+            <InstalarApp className="text-purple-700" />
+          </div>
           <div className="border-t border-gray-100 mt-2 pt-2 flex flex-col gap-1">
             {user ? (
               <>

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Mail, MapPin, PawPrint, Phone } from 'lucide-react';
+import InstalarApp from './InstalarApp';
 
 export default function Footer() {
   return (
@@ -13,6 +14,9 @@ export default function Footer() {
           <p className="text-sm text-gray-400">
             Conectando protetores, organizações e adotantes no Vale do Sinos/RS.
           </p>
+          <div className="mt-4">
+            <InstalarApp className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-full" />
+          </div>
         </div>
 
         <div>

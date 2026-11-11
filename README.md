@@ -22,6 +22,7 @@ ODS 3 (Saúde e bem-estar) e ODS 15 (Vida terrestre).
 | **Notificações** | Avisos em tempo real (sino no cabeçalho) sobre adoções, inscrições, mensagens e novos animais na cidade | Todos |
 | **Conta** | Cadastro por e-mail/senha ou Google, recuperação de senha, perfil, histórico, exclusão de conta | Todos |
 | **Contato** | Formulário com proteção contra spam e perguntas frequentes | Todos |
+| **App (PWA)** | Instalável no celular e no computador ("Instalar app" no rodapé), funciona com conexão instável, avisa quando há nova versão | Todos |
 
 ## Tecnologias
 
@@ -33,6 +34,7 @@ Todas são gratuitas ou têm plano gratuito, como pede o requisito não funciona
   - Auth (e-mail/senha e Google);
   - Storage (fotos);
   - Realtime (notificações).
+- **PWA:** vite-plugin-pwa (Web App Manifest + Service Worker com Workbox). As fotos ficam em cache; dados pessoais e sessões nunca.
 - **Testes de banco:** PGlite (PostgreSQL em WebAssembly), rodando as migrations e as regras de segurança localmente.
 
 ## Como rodar localmente
@@ -152,7 +154,6 @@ O requisito não funcional "Segurança de dados/acesso" é atendido assim:
 
 ## Próximos passos
 
-- **PWA (Progressive Web App):** tornar o site instalável no celular, com Web App Manifest, ícones e Service Worker (via `vite-plugin-pwa`), para melhorar a compatibilidade e a experiência em dispositivos móveis.
 - Deploy (Vercel ou Netlify, gratuitos), integrado ao repositório do GitHub.
 - Chatbot de orientação (previsto nos requisitos; adiado nesta etapa).
 - Login com Apple e Meta.
