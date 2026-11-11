@@ -57,13 +57,15 @@ const slides: Slide[] = [
 
 export default function HeroSlider() {
   const [current, setCurrent] = useState(0);
+  // não troca de slide sozinho para quem pediu menos movimento no sistema
+  const [reduzirMovimento] = useState(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false);
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    if (paused) return;
+    if (paused || reduzirMovimento) return;
     const timer = setInterval(() => setCurrent((prev) => (prev + 1) % slides.length), 5000);
     return () => clearInterval(timer);
-  }, [paused]);
+  }, [paused, reduzirMovimento]);
 
   return (
     <section
