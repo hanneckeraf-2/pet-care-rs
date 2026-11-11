@@ -30,3 +30,6 @@ dist-ssr
 
 # Supabase CLI
 supabase/.temp
+
+# Documentos locais do trabalho acadêmico (não versionar)
+proposta-etapa3.txt

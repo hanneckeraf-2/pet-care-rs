@@ -148,7 +148,9 @@ O requisito não funcional "Segurança de dados/acesso" é atendido assim:
 
 ## Próximos passos
 
+- **PWA (Progressive Web App):** tornar o site instalável no celular, com Web App Manifest, ícones e Service Worker (via `vite-plugin-pwa`), para melhorar a compatibilidade e a experiência em dispositivos móveis.
+- **GitHub:** publicar o repositório (hoje só local) no GitHub, com o histórico de commits, para versionamento e controle de configuração.
+- Deploy (Vercel ou Netlify, gratuitos), integrado ao repositório do GitHub.
 - Chatbot de orientação (previsto nos requisitos; adiado nesta etapa).
-- Deploy (Vercel ou Netlify, gratuitos).
 - Login com Apple e Meta.
 - Notificações por e-mail (SMTP próprio no Supabase).
