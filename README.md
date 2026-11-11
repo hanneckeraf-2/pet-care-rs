@@ -19,7 +19,7 @@ ODS 3 (Saúde e bem-estar) e ODS 15 (Vida terrestre).
 | **Painel da organização** | Cadastro e edição de animais com fotos, aprovação de adoções e de voluntários, perfil público (Pix, necessidades, redes sociais) e relatórios | Ana |
 | **Desaparecidos** | Registro de animal perdido ou encontrado com fotos, busca, mensagens para o tutor, marcar como "voltou para casa" | Fernanda |
 | **Organizações** | Lista e página pública de cada organização, com doação via Pix (sem intermediação do site) | Doadores |
-| **Notificações** | Avisos em tempo real (sino no cabeçalho) sobre adoções, inscrições, mensagens e novos animais na cidade | Todos |
+| **Notificações** | Avisos em tempo real (sino no cabeçalho) e por e-mail sobre adoções, inscrições, mensagens e novos animais na cidade | Todos |
 | **Conta** | Cadastro por e-mail/senha ou Google, recuperação de senha, perfil, histórico, exclusão de conta | Todos |
 | **Contato** | Formulário com proteção contra spam e perguntas frequentes | Todos |
 | **App (PWA)** | Instalável no celular e no computador ("Instalar app" no rodapé), funciona com conexão instável, avisa quando há nova versão | Todos |
@@ -81,6 +81,41 @@ Se preferir não usar a CLI: no **SQL Editor** do Supabase, execute cada arquivo
 npm run dev
 ```
 O site abre em http://localhost:5173.
+
+## Deploy (Vercel)
+O site é publicado na [Vercel](https://vercel.com), e cada push no `main` gera um deploy automático. A configuração está em `vercel.json`: rewrite para as rotas da SPA, headers de segurança e cache.
+
+1. Em vercel.com, entre com o GitHub e escolha **Add New → Project → Import** `pet-care-rs`. O preset Vite é detectado sozinho.
+2. Em **Environment Variables**, informe `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` e clique em **Deploy**.
+3. No Supabase, em **Authentication > URL Configuration**:
+   - troque a **Site URL** pela URL da Vercel;
+   - adicione `https://<seu-app>.vercel.app/**` às **Redirect URLs**, mantendo a de `localhost`.
+
+## Notificações por e-mail (Brevo)
+As notificações do site também são enviadas por e-mail, se o usuário mantiver a opção ligada no perfil. O envio passa pela Edge Function `supabase/functions/enviar-email-notificacao`, acionada a cada nova notificação. O provedor é o [Brevo](https://www.brevo.com), com plano gratuito de 300 e-mails por dia.
+
+1. **Brevo:**
+   1. Crie a conta.
+   2. Em **Senders, Domains & Dedicated IPs → Senders**, adicione e verifique o e-mail remetente.
+   3. Em **SMTP & API**, gere uma **API key** e anote também as credenciais **SMTP**.
+2. **E-mails de login** (confirmação e recuperação de senha): no Supabase, em **Authentication > Emails > SMTP Settings**, ative o SMTP personalizado com:
+   - host `smtp-relay.brevo.com`, porta `587`;
+   - usuário e senha SMTP do Brevo;
+   - o e-mail remetente verificado.
+3. **Segredos da função**, fora do git:
+   ```bash
+   npx supabase secrets set BREVO_API_KEY=... EMAIL_REMETENTE=voce@exemplo.com SITE_URL=https://<seu-app>.vercel.app WEBHOOK_SECRET=<texto-aleatorio-longo>
+   ```
+4. **Publicar a função:**
+   ```bash
+   npx supabase functions deploy enviar-email-notificacao --no-verify-jwt
+   ```
+5. **Criar o webhook** em **Database > Webhooks > Create a new hook**:
+   - tabela `notificacao`, evento **Insert**;
+   - tipo **Supabase Edge Functions**, função `enviar-email-notificacao`, método `POST`;
+   - header `x-webhook-secret` com o mesmo valor de `WEBHOOK_SECRET`.
+
+   O webhook é criado no painel, e não numa migration, para o segredo não ficar no repositório público.
 
 ## Tornar um usuário administrador de organização
 1. Cadastre-se normalmente pelo site.
@@ -154,7 +189,5 @@ O requisito não funcional "Segurança de dados/acesso" é atendido assim:
 
 ## Próximos passos
 
-- Deploy (Vercel ou Netlify, gratuitos), integrado ao repositório do GitHub.
 - Chatbot de orientação (previsto nos requisitos; adiado nesta etapa).
 - Login com Apple e Meta.
-- Notificações por e-mail (SMTP próprio no Supabase).

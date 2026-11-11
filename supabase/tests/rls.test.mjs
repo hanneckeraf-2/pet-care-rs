@@ -211,6 +211,13 @@ await as(U_ANA, async () => {
   await expectErr('ana não transfere animal para terceiro', `update public.animal set id_usuario='${U_OUTRO}' where nome='Mimi'`);
 });
 
+// ---- Fase 12: preferência de e-mail ----
+await expectOk('notificar_email ligado por padrão', `select bool_and(notificar_email) t from public.usuario`, (r) => r[0].t === true);
+await as(U_MARIA, async () => {
+  await expectOk('maria desliga os e-mails', `update public.usuario set notificar_email=false where id='${U_MARIA}' returning notificar_email`, (r) => r[0].notificar_email === false);
+  await expectOk('maria não altera preferência de outro', `update public.usuario set notificar_email=false where id='${U_OUTRO}' returning id`, (r) => r.length === 0);
+});
+
 await as(null, async () => {
   await expectErr('anon não exclui conta', `select public.excluir_minha_conta()`);
 });

@@ -48,6 +48,7 @@ export type Database = {
           cidade: string | null;
           tipo_usuario: Database['public']['Enums']['tipo_usuario'];
           alertas_ativos: boolean;
+          notificar_email: boolean;
           foto_url: string | null;
         } & Timestamps;
         Insert: {
@@ -59,6 +60,7 @@ export type Database = {
           cidade?: string | null;
           tipo_usuario?: Database['public']['Enums']['tipo_usuario'];
           alertas_ativos?: boolean;
+          notificar_email?: boolean;
           foto_url?: string | null;
         };
         Update: Partial<Database['public']['Tables']['usuario']['Insert']>;

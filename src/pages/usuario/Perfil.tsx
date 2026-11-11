@@ -22,6 +22,7 @@ const schema = z.object({
     .regex(/^[\d\s()+-]*$/, { error: 'Use apenas números, espaços, parênteses e hífen.' }),
   cidade: z.string(),
   alertas_ativos: z.boolean(),
+  notificar_email: z.boolean(),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -57,6 +58,7 @@ export default function Perfil() {
         telefone: perfil.telefone ?? '',
         cidade: perfil.cidade ?? '',
         alertas_ativos: perfil.alertas_ativos,
+        notificar_email: perfil.notificar_email,
       });
     }
   }, [perfil, reset]);
@@ -95,6 +97,7 @@ export default function Perfil() {
         telefone: dados.telefone || null,
         cidade: dados.cidade || null,
         alertas_ativos: dados.alertas_ativos,
+        notificar_email: dados.notificar_email,
       })
       .eq('id', user.id);
     if (error) return setErro(traduzirErro(error));
@@ -148,12 +151,17 @@ export default function Perfil() {
               {CIDADES.map((c) => <option key={c} value={c}>{c}</option>)}
             </Select>
           </Field>
-          <div className="flex items-end pb-2">
+          <fieldset className="sm:col-span-2 space-y-2">
+            <legend className="text-sm font-medium text-gray-700 mb-1">Notificações</legend>
             <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
               <input type="checkbox" className="w-4 h-4 accent-purple-600" {...register('alertas_ativos')} />
               Avise-me sobre novos animais na minha cidade
             </label>
-          </div>
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input type="checkbox" className="w-4 h-4 accent-purple-600" {...register('notificar_email')} />
+              Receber as notificações também por e-mail
+            </label>
+          </fieldset>
           <div className="sm:col-span-2">
             <Button type="submit" loading={isSubmitting} disabled={!isDirty}>Salvar alterações</Button>
           </div>
