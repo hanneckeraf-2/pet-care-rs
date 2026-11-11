@@ -10,6 +10,12 @@ Ele conecta ONGs, abrigos e protetores a adotantes, voluntários, doadores e tut
 Projeto das Atividades Extensionistas da UNINTER (Bacharelado em Ciência da Computação).
 ODS 3 (Saúde e bem-estar) e ODS 15 (Vida terrestre).
 
+## Organizações parceiras
+Os testes e a implantação acontecem em **São Leopoldo/RS**, com duas iniciativas voluntárias de proteção animal que surgiram durante a enchente de 2024 no Rio Grande do Sul:
+
+- **Projeto Mãos e Patas:** [@maosepatasrs](https://www.instagram.com/maosepatasrs/)
+- **Adote um Amigo:** [@adoteumamigo_sl](https://www.instagram.com/adoteumamigo_sl/)
+
 ## Funcionalidades
 
 | Área | O que faz | Persona |
@@ -90,6 +96,7 @@ O site é publicado na [Vercel](https://vercel.com), e cada push no `main` gera 
 3. No Supabase, em **Authentication > URL Configuration**:
    - troque a **Site URL** pela URL da Vercel;
    - adicione `https://<seu-app>.vercel.app/**` às **Redirect URLs**, mantendo a de `localhost`.
+4. **Dados de produção:** o `seed.sql` serve só para desenvolvimento. No banco de produção, rode uma vez no SQL Editor o script `supabase/producao/parceiros.sql`. Ele remove as organizações fictícias e cadastra as parceiras reais, e no final traz um modelo para vincular o responsável de cada uma como administrador.
 
 ## Notificações por e-mail (Brevo)
 As notificações do site também são enviadas por e-mail, se o usuário mantiver a opção ligada no perfil. O envio passa pela Edge Function `supabase/functions/enviar-email-notificacao`, acionada a cada nova notificação. O provedor é o [Brevo](https://www.brevo.com), com plano gratuito de 300 e-mails por dia.
@@ -151,7 +158,8 @@ src/
   types/         tipos do banco (database.ts)
 supabase/
   migrations/    esquema SQL, políticas RLS, funções, triggers e storage (em ordem)
-  seed.sql       dados de exemplo
+  seed.sql       dados de exemplo (desenvolvimento)
+  producao/      script de preparação do banco de produção (organizações parceiras)
   tests/         testes das migrations e das políticas de segurança
 ```
 
