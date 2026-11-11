@@ -81,7 +81,9 @@ export default function DetalheAnimal() {
   const disponivelParaAdocao = !!animal.organizacao && (animal.status === 'disponivel' || animal.status === 'em_processo');
   const solicitacaoAberta = solicitacao?.status === 'em_analise';
   const gerencia =
-    perfil?.tipo_usuario === 'admin_org' && animal.id_organizacao !== null && perfil.id_organizacao === animal.id_organizacao;
+    animal.id_organizacao !== null &&
+    (perfil?.tipo_usuario === 'admin_sistema' ||
+      (perfil?.tipo_usuario === 'admin_org' && perfil.id_organizacao === animal.id_organizacao));
 
   function clicarSolicitar() {
     if (!user) {
@@ -145,7 +147,7 @@ export default function DetalheAnimal() {
           <p className="text-gray-500 text-sm mb-6">Cadastrado em {formatarData(animal.criado_em)}</p>
           {gerencia && (
             <Link
-              to={`/admin/animais/${animal.id}/editar`}
+              to={`/admin/animais/${animal.id}/editar?org=${animal.id_organizacao}`}
               className="inline-flex items-center gap-2 mb-6 border border-purple-300 text-purple-700 px-4 py-2 rounded-md text-sm font-semibold hover:bg-purple-50"
             >
               <Pencil size={16} aria-hidden="true" /> Editar este animal

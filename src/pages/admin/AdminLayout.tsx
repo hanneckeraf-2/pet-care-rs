@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, NavLink, Outlet, useOutletContext } from 'react-router-dom';
+import { Link, NavLink, Outlet, useOutletContext, useSearchParams } from 'react-router-dom';
 import { BarChart3, Building2, ExternalLink, HandHeart, Heart, LayoutDashboard, PawPrint } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Tables } from '../../types/database';
 import Spinner from '../../components/Spinner';
+
+const CHAVE_ORG = 'petcare:admin-organizacao';
 
 export type AdminContext = {
   org: Tables<'organizacao'>;
@@ -29,17 +31,62 @@ export default function AdminLayout() {
   const { perfil } = useAuth();
   const [org, setOrg] = useState<Tables<'organizacao'> | null>(null);
   const [carregando, setCarregando] = useState(true);
-  const orgId = perfil?.id_organizacao ?? null;
+
+  // O administrador do sistema gerencia qualquer organização e escolhe qual no seletor;
+  // o administrador de organização fica sempre na sua.
+  const sistema = perfil?.tipo_usuario === 'admin_sistema';
+  const [organizacoes, setOrganizacoes] = useState<{ id: number; nome: string }[]>([]);
+  const [escolhida, setEscolhida] = useState<number | null>(() => {
+    try {
+      const salvo = Number(localStorage.getItem(CHAVE_ORG));
+      return Number.isInteger(salvo) && salvo > 0 ? salvo : null;
+    } catch {
+      return null;
+    }
+  });
+
+  // links como /admin/animais/5/editar?org=2 abrem o painel já na organização certa
+  const [params] = useSearchParams();
+  const orgDaUrl = Number(params.get('org'));
+  useEffect(() => {
+    if (sistema && Number.isInteger(orgDaUrl) && orgDaUrl > 0) setEscolhida(orgDaUrl);
+  }, [sistema, orgDaUrl]);
+
+  useEffect(() => {
+    if (!sistema) return;
+    supabase
+      .from('organizacao')
+      .select('id, nome')
+      .order('nome')
+      .then(({ data }) => {
+        setOrganizacoes(data ?? []);
+        if (!data?.length) setCarregando(false);
+      });
+  }, [sistema]);
+
+  const orgId = sistema
+    ? organizacoes.find((o) => o.id === escolhida)?.id ?? organizacoes[0]?.id ?? null
+    : perfil?.id_organizacao ?? null;
+
+  function trocarOrganizacao(id: number) {
+    setEscolhida(id);
+    try {
+      localStorage.setItem(CHAVE_ORG, String(id));
+    } catch {
+      // sem localStorage: a escolha vale só nesta visita
+    }
+  }
 
   const recarregarOrg = useCallback(async () => {
     if (!orgId) {
-      setCarregando(false);
+      // admin do sistema: espera a lista de organizações carregar
+      if (!sistema) setCarregando(false);
       return;
     }
     const { data } = await supabase.from('organizacao').select('*').eq('id', orgId).maybeSingle();
     setOrg(data);
     setCarregando(false);
-  }, [orgId]);
+  }, [orgId, sistema]);
 
   useEffect(() => {
     recarregarOrg();
@@ -62,7 +109,21 @@ export default function AdminLayout() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
         <div>
           <p className="text-sm text-gray-500 uppercase tracking-wide">Painel da organização</p>
-          <h1 className="text-2xl md:text-3xl font-bold">{org.nome}</h1>
+          {sistema && organizacoes.length > 1 ? (
+            <>
+              <label htmlFor="org-ativa" className="sr-only">Organização</label>
+              <select
+                id="org-ativa"
+                value={org.id}
+                onChange={(e) => trocarOrganizacao(Number(e.target.value))}
+                className="text-2xl md:text-3xl font-bold bg-transparent border-b-2 border-purple-300 focus:border-purple-600 focus:outline-none pr-2 cursor-pointer"
+              >
+                {organizacoes.map((o) => <option key={o.id} value={o.id}>{o.nome}</option>)}
+              </select>
+            </>
+          ) : (
+            <h1 className="text-2xl md:text-3xl font-bold">{org.nome}</h1>
+          )}
         </div>
         <Link to={`/organizacoes/${org.id}`} className="inline-flex items-center gap-1 text-purple-700 hover:underline text-sm font-semibold">
           Ver página pública <ExternalLink size={14} aria-hidden="true" />

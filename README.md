@@ -133,7 +133,7 @@ As notificações do site também são enviadas por e-mail, se o usuário mantiv
        id_organizacao = (select id from public.organizacao where nome = 'Abrigo Patas Unidas')
    where email = 'seu-email@exemplo.com';
    ```
-   Use `tipo_usuario = 'admin_sistema'` para um administrador geral.
+   Use `tipo_usuario = 'admin_sistema'` para um administrador geral. Ele gerencia **todas** as organizações: o nome da organização no topo do painel vira um seletor. Ele também recebe as notificações de todas elas (adoções, inscrições e mensagens).
 3. Recarregue o site. A opção **Painel da organização** aparece no menu do usuário.
 
 ## Scripts

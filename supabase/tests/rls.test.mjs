@@ -218,6 +218,23 @@ await as(U_MARIA, async () => {
   await expectOk('maria não altera preferência de outro', `update public.usuario set notificar_email=false where id='${U_OUTRO}' returning id`, (r) => r.length === 0);
 });
 
+// ---- Administrador do sistema gerencia várias organizações ----
+const U_SIS = '00000000-0000-0000-0000-000000000009';
+// limpa o usuário "logado" pelos testes anteriores: o setup roda como superusuário
+await db.exec(`select set_config('request.jwt.claim.sub', '', false);
+               insert into auth.users (id, email) values ('${U_SIS}', 'sistema@x.com');
+               update public.usuario set tipo_usuario='admin_sistema' where id='${U_SIS}';`);
+await as(U_SIS, async () => {
+  await expectOk('admin do sistema cadastra animal em qualquer ONG', `insert into public.animal (id_organizacao,nome,especie,cidade) values ((select id from public.organizacao where nome='ONG Amigo Fiel'),'Pipoca','gato','São Leopoldo') returning id`, (r) => r.length === 1);
+  await expectOk('admin do sistema edita qualquer ONG', `update public.organizacao set pix_doacao='pix@x' where nome='Lar Temporário Esperança' returning id`, (r) => r.length === 1);
+});
+await as(U_MARIA, async () => {
+  await expectOk('maria pede o Pipoca', `insert into public.adocao (id_usuario,id_animal) values ('${U_MARIA}', (select id from public.animal where nome='Pipoca'))`);
+});
+await expectOk('admin do sistema é notificado da adoção', `select count(*)::int c from public.notificacao where id_usuario='${U_SIS}' and tipo='adocao_nova'`, (r) => r[0].c >= 1);
+await expectOk('ana (outra ONG) não é notificada do Pipoca', `select count(*)::int c from public.notificacao where id_usuario='${U_ANA}' and mensagem like '%Pipoca%'`, (r) => r[0].c === 0);
+await db.exec(`select set_config('request.jwt.claim.sub', '', false); delete from auth.users where id='${U_SIS}';`);
+
 await as(null, async () => {
   await expectErr('anon não exclui conta', `select public.excluir_minha_conta()`);
 });
