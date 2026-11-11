@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Building2, Check, Copy, Facebook, Globe, HandCoins, Instagram, Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
+import { ArrowLeft, Building2, Check, Copy, Facebook, Globe, HandCoins, Instagram, Mail, MapPin, MessageCircle, Phone, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
 import { ANIMAL_CARD_SELECT, type AnimalCard } from '../../lib/animais';
@@ -73,6 +73,7 @@ export default function PaginaOrganizacao() {
     org.telefone && { href: `tel:${org.telefone.replace(/[^\d+]/g, '')}`, label: org.telefone, icon: Phone },
     org.email && { href: `mailto:${org.email}`, label: org.email, icon: Mail },
     contatos.whatsapp && { href: `https://wa.me/${contatos.whatsapp}`, label: 'WhatsApp', icon: MessageCircle },
+    contatos.whatsappGrupo && { href: contatos.whatsappGrupo, label: 'Grupo no WhatsApp', icon: Users },
     contatos.instagram && { href: contatos.instagram, label: 'Instagram', icon: Instagram },
     contatos.facebook && { href: contatos.facebook, label: 'Facebook', icon: Facebook },
     contatos.site && { href: contatos.site, label: 'Site', icon: Globe },

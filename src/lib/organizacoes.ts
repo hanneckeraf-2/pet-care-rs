@@ -2,7 +2,10 @@ import type { QueryData } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import type { Json } from '../types/database';
 
-export type Contatos = { instagram?: string; facebook?: string; whatsapp?: string; site?: string };
+export type Contatos = { instagram?: string; facebook?: string; whatsapp?: string; whatsappGrupo?: string; site?: string };
+
+/** Link de convite de grupo/comunidade do WhatsApp */
+export const REGEX_GRUPO_WHATSAPP = /^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+\/?$/;
 
 /** Lê o JSON de contatos da organização aceitando só valores seguros. */
 export function lerContatos(json: Json): Contatos {
@@ -15,6 +18,8 @@ export function lerContatos(json: Json): Contatos {
     facebook: url(obj.facebook),
     site: url(obj.site),
     whatsapp: whatsapp.length >= 10 ? whatsapp : undefined,
+    whatsappGrupo:
+      typeof obj.whatsapp_grupo === 'string' && REGEX_GRUPO_WHATSAPP.test(obj.whatsapp_grupo) ? obj.whatsapp_grupo : undefined,
   };
 }
 

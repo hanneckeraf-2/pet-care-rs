@@ -6,7 +6,7 @@ import { Building2, ImagePlus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
 import { CIDADES } from '../../lib/constants';
-import { lerContatos } from '../../lib/organizacoes';
+import { REGEX_GRUPO_WHATSAPP, lerContatos } from '../../lib/organizacoes';
 import { TIPOS_IMAGEM, validarImagem } from '../../lib/upload';
 import { useAuth } from '../../contexts/AuthContext';
 import { Alert, Button, Card, Field, Input, Select, Textarea } from '../../components/ui';
@@ -25,6 +25,10 @@ const schema = z.object({
   telefone: z.string().trim().max(20).regex(/^[\d\s()+-]*$/, { error: 'Telefone inválido.' }),
   email: z.union([z.email({ error: 'E-mail inválido.' }), z.literal('')]),
   whatsapp: z.string().trim().max(20).regex(/^[\d\s()+-]*$/, { error: 'Use apenas números (com DDD).' }),
+  whatsapp_grupo: z
+    .string()
+    .trim()
+    .refine((v) => v === '' || REGEX_GRUPO_WHATSAPP.test(v), { error: 'Cole o link de convite completo, no formato https://chat.whatsapp.com/...' }),
   instagram: urlOpcional,
   facebook: urlOpcional,
   site: urlOpcional,
@@ -54,6 +58,7 @@ export default function AdminPerfil() {
       telefone: org.telefone ?? '',
       email: org.email ?? '',
       whatsapp: c.whatsapp ?? '',
+      whatsapp_grupo: c.whatsappGrupo ?? '',
       instagram: c.instagram ?? '',
       facebook: c.facebook ?? '',
       site: c.site ?? '',
@@ -67,6 +72,7 @@ export default function AdminPerfil() {
     const contatos: Record<string, string> = {};
     const whats = d.whatsapp.replace(/\D/g, '');
     if (whats) contatos.whatsapp = whats.length <= 11 ? `55${whats}` : whats;
+    if (d.whatsapp_grupo) contatos.whatsapp_grupo = d.whatsapp_grupo;
     if (d.instagram) contatos.instagram = d.instagram;
     if (d.facebook) contatos.facebook = d.facebook;
     if (d.site) contatos.site = d.site;
@@ -173,6 +179,14 @@ export default function AdminPerfil() {
             </Field>
             <Field id="whatsapp" label="WhatsApp (com DDD)" error={errors.whatsapp?.message}>
               <Input id="whatsapp" type="tel" placeholder="51 99999-9999" invalid={!!errors.whatsapp} {...register('whatsapp')} />
+            </Field>
+            <Field
+              id="whatsapp-grupo"
+              label="Grupo do WhatsApp (link de convite)"
+              hint="No WhatsApp: abra o grupo → nome do grupo → Convidar via link → Copiar link."
+              error={errors.whatsapp_grupo?.message}
+            >
+              <Input id="whatsapp-grupo" placeholder="https://chat.whatsapp.com/..." invalid={!!errors.whatsapp_grupo} {...register('whatsapp_grupo')} />
             </Field>
             <Field id="instagram" label="Instagram (link)" error={errors.instagram?.message}>
               <Input id="instagram" placeholder="https://instagram.com/..." invalid={!!errors.instagram} {...register('instagram')} />
