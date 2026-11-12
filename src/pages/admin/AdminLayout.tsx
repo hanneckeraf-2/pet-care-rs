@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useOutletContext, useSearchParams } from 'react-router-dom';
-import { BarChart3, Building2, ExternalLink, HandHeart, Heart, LayoutDashboard, MessageCircle, PawPrint } from 'lucide-react';
+import { BarChart3, Building2, ExternalLink, HandHeart, Heart, Inbox, LayoutDashboard, MessageCircle, PawPrint, ShieldCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Tables } from '../../types/database';
@@ -26,6 +26,12 @@ const itens = [
   { to: '/admin/voluntariado', label: 'Voluntariado', icon: HandHeart },
   { to: '/admin/perfil', label: 'Perfil da organização', icon: Building2 },
   { to: '/admin/relatorios', label: 'Relatórios', icon: BarChart3 },
+];
+
+// itens exclusivos do administrador do sistema
+const itensSistema = [
+  { to: '/admin/sistema/organizacoes', label: 'Organizações e admins', icon: ShieldCheck, end: false },
+  { to: '/admin/sistema/contato', label: 'Mensagens do site', icon: Inbox, end: false },
 ];
 
 export default function AdminLayout() {
@@ -133,7 +139,7 @@ export default function AdminLayout() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
         <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible bg-white rounded-lg shadow-sm p-2 h-fit" aria-label="Painel">
-          {itens.map(({ to, label, icon: Icon, end }) => (
+          {[...itens, ...(sistema ? itensSistema : [])].map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
