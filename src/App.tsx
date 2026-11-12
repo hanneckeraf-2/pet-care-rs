@@ -30,6 +30,7 @@ const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AdminAnimais = lazy(() => import('./pages/admin/AdminAnimais'));
 const AnimalForm = lazy(() => import('./pages/admin/AnimalForm'));
 const AdminAdocoes = lazy(() => import('./pages/admin/AdminAdocoes'));
+const AdminMensagens = lazy(() => import('./pages/admin/AdminMensagens'));
 const AdminVoluntariado = lazy(() => import('./pages/admin/AdminVoluntariado'));
 const AdminPerfil = lazy(() => import('./pages/admin/AdminPerfil'));
 const AdminRelatorios = lazy(() => import('./pages/admin/AdminRelatorios'));
@@ -74,6 +75,7 @@ export default function App() {
                   <Route path="animais/novo" element={<AnimalForm />} />
                   <Route path="animais/:id/editar" element={<AnimalForm />} />
                   <Route path="adocoes" element={<AdminAdocoes />} />
+                  <Route path="mensagens" element={<AdminMensagens />} />
                   <Route path="voluntariado" element={<AdminVoluntariado />} />
                   <Route path="perfil" element={<AdminPerfil />} />
                   <Route path="relatorios" element={<AdminRelatorios />} />

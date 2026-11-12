@@ -26,9 +26,10 @@ export default function PetCard({ animal, to, acao }: PetCardProps) {
             <PawPrint className="w-16 h-16" />
           </div>
         )}
-        {mostrarStatus && (
-          <div className="absolute top-2 left-2">
-            <Badge {...STATUS_ANIMAL[animal.status]} />
+        {(mostrarStatus || animal.aceita_lar_temporario) && (
+          <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
+            {mostrarStatus && <Badge {...STATUS_ANIMAL[animal.status]} />}
+            {animal.aceita_lar_temporario && <Badge label="Precisa de lar temporário" cor="bg-teal-100 text-teal-800" />}
           </div>
         )}
       </Link>

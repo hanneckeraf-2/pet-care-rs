@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import type { QueryData } from '@supabase/supabase-js';
-import { ArrowLeft, Building2, Calendar, CheckCircle2, Heart, Mail, MapPin, PawPrint, Pencil, Phone, Ruler, Tag } from 'lucide-react';
+import { ArrowLeft, Building2, Calendar, CheckCircle2, Heart, Home, Mail, MapPin, MessageCircle, PawPrint, Pencil, Phone, Ruler, Tag } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
 import { ESPECIE_LABEL, PORTE_LABEL, SEXO_LABEL, formatarIdade } from '../../lib/animais';
@@ -12,6 +12,7 @@ import Badge from '../../components/Badge';
 import Spinner from '../../components/Spinner';
 import NotFound from '../NotFound';
 import SolicitarAdocao from './SolicitarAdocao';
+import PerguntaAnimal from './PerguntaAnimal';
 import type { Enums } from '../../types/database';
 
 const detalheQuery = (id: number) =>
@@ -23,7 +24,8 @@ const detalheQuery = (id: number) =>
     .maybeSingle();
 type AnimalDetalhe = NonNullable<QueryData<ReturnType<typeof detalheQuery>>>;
 
-type MinhaSolicitacao = { id: number; status: Enums<'status_adocao'>; criado_em: string } | null;
+type MinhaSolicitacao = { id: number; status: Enums<'status_adocao'>; criado_em: string; tipo: Enums<'tipo_solicitacao'> };
+type Acao = Enums<'tipo_solicitacao'> | 'pergunta';
 
 export default function DetalheAnimal() {
   const { id } = useParams();
@@ -36,9 +38,10 @@ export default function DetalheAnimal() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [fotoAtiva, setFotoAtiva] = useState(0);
-  const [solicitacao, setSolicitacao] = useState<MinhaSolicitacao>(null);
-  const [mostrarForm, setMostrarForm] = useState(false);
-  const [enviado, setEnviado] = useState(false);
+  // última solicitação do usuário para este animal, por tipo (adoção / lar temporário)
+  const [solicitacoes, setSolicitacoes] = useState<Partial<Record<Enums<'tipo_solicitacao'>, MinhaSolicitacao>>>({});
+  const [formAberto, setFormAberto] = useState<Acao | null>(null);
+  const [enviado, setEnviado] = useState<Acao | null>(null);
 
   useEffect(() => {
     if (!Number.isInteger(animalId)) {
@@ -53,16 +56,17 @@ export default function DetalheAnimal() {
   }, [animalId]);
 
   const carregarSolicitacao = useCallback(async () => {
-    if (!user || !Number.isInteger(animalId)) return setSolicitacao(null);
+    if (!user || !Number.isInteger(animalId)) return setSolicitacoes({});
     const { data } = await supabase
       .from('adocao')
-      .select('id, status, criado_em')
+      .select('id, status, criado_em, tipo')
       .eq('id_animal', animalId)
       .eq('id_usuario', user.id)
-      .order('criado_em', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    setSolicitacao(data);
+      .order('criado_em', { ascending: true });
+    // em ordem crescente, a mais recente de cada tipo sobrescreve as anteriores
+    const porTipo: Partial<Record<Enums<'tipo_solicitacao'>, MinhaSolicitacao>> = {};
+    (data ?? []).forEach((item) => (porTipo[item.tipo] = item));
+    setSolicitacoes(porTipo);
   }, [user, animalId]);
 
   useEffect(() => {
@@ -79,19 +83,59 @@ export default function DetalheAnimal() {
 
   const fotos = animal.foto;
   const disponivelParaAdocao = !!animal.organizacao && (animal.status === 'disponivel' || animal.status === 'em_processo');
-  const solicitacaoAberta = solicitacao?.status === 'em_analise';
+  const aceitaLarTemporario = disponivelParaAdocao && animal.aceita_lar_temporario;
   const gerencia =
     animal.id_organizacao !== null &&
     (perfil?.tipo_usuario === 'admin_sistema' ||
       (perfil?.tipo_usuario === 'admin_org' && perfil.id_organizacao === animal.id_organizacao));
 
-  function clicarSolicitar() {
+  function abrir(acao: Acao) {
     if (!user) {
       navigate('/entrar', { state: { from: location.pathname } });
       return;
     }
-    setMostrarForm(true);
-    setTimeout(() => document.getElementById('form-adocao')?.scrollIntoView({ behavior: 'smooth' }), 50);
+    setEnviado(null);
+    setFormAberto(acao);
+    setTimeout(() => document.getElementById('form-acao')?.scrollIntoView({ behavior: 'smooth' }), 50);
+  }
+
+  function aoEnviar(acao: Acao) {
+    setEnviado(acao);
+    setFormAberto(null);
+    carregarSolicitacao();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  const textoEnviado: Record<Acao, string> = {
+    adocao: 'Solicitação de adoção enviada! Ela está em análise pela organização.',
+    lar_temporario: 'Pedido de lar temporário enviado! A organização vai analisar e entrar em contato.',
+    pergunta: 'Pergunta enviada! A organização vai responder pelo contato que você informou.',
+  };
+
+  /** Botão de uma ação, ou a situação da solicitação já feita. */
+  function acaoSolicitacao(tipo: Enums<'tipo_solicitacao'>, rotulo: string, icone: ReactNode, classe: string) {
+    const atual = solicitacoes[tipo];
+    if (atual?.status === 'em_analise') {
+      return (
+        <div className="flex flex-wrap items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-md p-3 text-sm">
+          <CheckCircle2 className="text-yellow-700" size={18} aria-hidden="true" />
+          {tipo === 'adocao' ? 'Você solicitou a adoção' : 'Você pediu para ser lar temporário'} em {formatarData(atual.criado_em)}:
+          <Badge {...STATUS_ADOCAO[atual.status]} />
+        </div>
+      );
+    }
+    return (
+      <div>
+        <Button onClick={() => abrir(tipo)} className={`w-full sm:w-auto !px-6 !py-3 ${classe}`}>
+          {icone} {rotulo}
+        </Button>
+        {atual && (
+          <p className="text-xs text-gray-500 mt-1">
+            Pedido anterior: <Badge {...STATUS_ADOCAO[atual.status]} />
+          </p>
+        )}
+      </div>
+    );
   }
 
   const caracteristicas = [
@@ -189,23 +233,39 @@ export default function DetalheAnimal() {
             </Card>
           )}
 
-          {/* Ação de adoção */}
-          {enviado ? (
-            <Alert type="success">
-              <strong>Solicitação enviada!</strong> Sua solicitação está em análise pela {animal.organizacao?.nome}. Você pode acompanhar o andamento em{' '}
-              <Link to="/perfil" className="underline font-semibold">Meu perfil</Link>.
-            </Alert>
-          ) : solicitacaoAberta ? (
-            <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-md p-3 text-sm">
-              <CheckCircle2 className="text-yellow-700" size={18} aria-hidden="true" />
-              Você já solicitou a adoção em {formatarData(solicitacao.criado_em)}: <Badge {...STATUS_ADOCAO[solicitacao.status]} />
+          {/* Ações: adoção, lar temporário e perguntas */}
+          {enviado && (
+            <div className="mb-4">
+              <Alert type="success">
+                {textoEnviado[enviado]}{' '}
+                {enviado !== 'pergunta' && (
+                  <>Acompanhe em <Link to="/perfil" className="underline font-semibold">Meu perfil</Link>.</>
+                )}
+              </Alert>
             </div>
-          ) : disponivelParaAdocao ? (
-            !mostrarForm && (
-              <Button onClick={clicarSolicitar} className="w-full sm:w-auto !px-8 !py-3 text-lg">
-                <Heart size={20} aria-hidden="true" /> Solicitar Adoção
-              </Button>
-            )
+          )}
+
+          {aceitaLarTemporario && (
+            <div className="flex gap-3 bg-teal-50 border border-teal-200 text-teal-900 rounded-lg p-4 mb-4 text-sm">
+              <Home className="shrink-0 text-teal-700" size={20} aria-hidden="true" />
+              <p>
+                <strong>{animal.nome} precisa de um lar temporário.</strong> Se você não pode adotar agora, pode acolhê-lo por um
+                período enquanto ele espera uma família definitiva.
+              </p>
+            </div>
+          )}
+
+          {disponivelParaAdocao ? (
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
+              {acaoSolicitacao('adocao', 'Solicitar Adoção', <Heart size={20} aria-hidden="true" />, 'text-lg')}
+              {aceitaLarTemporario &&
+                acaoSolicitacao('lar_temporario', 'Quero ser Lar Temporário', <Home size={20} aria-hidden="true" />, '!bg-teal-600 hover:!bg-teal-700')}
+              <div>
+                <Button variant="secondary" onClick={() => abrir('pergunta')} className="w-full sm:w-auto !px-6 !py-3">
+                  <MessageCircle size={20} aria-hidden="true" /> Quero Mais Informações
+                </Button>
+              </div>
+            </div>
           ) : animal.organizacao ? (
             <p className="text-gray-600">Este animal não está mais disponível para adoção.</p>
           ) : (
@@ -214,28 +274,30 @@ export default function DetalheAnimal() {
               <Link to="/desaparecidos" className="text-purple-700 font-semibold hover:underline">Ver animais desaparecidos</Link>
             </p>
           )}
-          {solicitacao && !solicitacaoAberta && !enviado && disponivelParaAdocao && (
-            <p className="text-sm text-gray-500 mt-2">
-              Sua solicitação anterior: <Badge {...STATUS_ADOCAO[solicitacao.status]} />
-            </p>
-          )}
         </div>
       </div>
 
-      {mostrarForm && !enviado && (
-        <div id="form-adocao" className="max-w-3xl mx-auto mt-12">
+      {formAberto && (
+        <div id="form-acao" className="max-w-3xl mx-auto mt-12">
           <Card>
-            <SolicitarAdocao
-              animalId={animal.id}
-              animalNome={animal.nome}
-              onCancelar={() => setMostrarForm(false)}
-              onEnviado={() => {
-                setEnviado(true);
-                setMostrarForm(false);
-                carregarSolicitacao();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-            />
+            {formAberto === 'pergunta' ? (
+              <PerguntaAnimal
+                animalId={animal.id}
+                animalNome={animal.nome}
+                organizacaoNome={animal.organizacao?.nome}
+                onCancelar={() => setFormAberto(null)}
+                onEnviado={() => aoEnviar('pergunta')}
+              />
+            ) : (
+              <SolicitarAdocao
+                key={formAberto}
+                tipo={formAberto}
+                animalId={animal.id}
+                animalNome={animal.nome}
+                onCancelar={() => setFormAberto(null)}
+                onEnviado={() => aoEnviar(formAberto)}
+              />
+            )}
           </Card>
         </div>
       )}

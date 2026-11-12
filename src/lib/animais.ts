@@ -39,7 +39,7 @@ export function formatarIdade(meses: number | null): string {
 
 /** Campos usados nos cards de animais */
 export const ANIMAL_CARD_SELECT =
-  'id, nome, especie, raca, idade_meses, sexo, porte, status, cidade, organizacao(id, nome), foto(url, ordem)' as const;
+  'id, nome, especie, raca, idade_meses, sexo, porte, status, cidade, aceita_lar_temporario, organizacao(id, nome), foto(url, ordem)' as const;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- usado só para inferir o tipo
 const cardQuery = supabase.from('animal').select(ANIMAL_CARD_SELECT);
@@ -56,6 +56,8 @@ export type FiltrosAnimais = {
   idade?: string;
   cidade?: string;
   organizacao?: string;
+  /** '1' = só animais que precisam de lar temporário */
+  lar_temporario?: string;
   porte?: string;
   sexo?: string;
 };
@@ -77,6 +79,7 @@ export async function buscarAnimaisParaAdocao(filtros: FiltrosAnimais, pagina: n
   if (filtros.organizacao) query = query.eq('id_organizacao', Number(filtros.organizacao));
   if (filtros.porte) query = query.eq('porte', filtros.porte as Enums<'porte'>);
   if (filtros.sexo) query = query.eq('sexo', filtros.sexo as Enums<'sexo'>);
+  if (filtros.lar_temporario === '1') query = query.eq('aceita_lar_temporario', true);
 
   const faixa = filtros.idade ? FAIXA_IDADE_MESES[filtros.idade] : undefined;
   if (faixa) {
@@ -131,3 +134,16 @@ export async function buscarDesaparecidos(filtros: FiltrosDesaparecidos, pagina:
 
 /** Status que uma organização pode atribuir aos seus animais */
 export const STATUS_EDITAVEIS_ORG: Enums<'status_animal'>[] = ['disponivel', 'em_processo', 'adotado', 'resgatado', 'encontrado', 'reunido'];
+
+export const TIPO_SOLICITACAO: Record<Enums<'tipo_solicitacao'>, { label: string; cor: string }> = {
+  adocao: { label: 'Adoção', cor: 'bg-purple-100 text-purple-800' },
+  lar_temporario: { label: 'Lar temporário', cor: 'bg-teal-100 text-teal-800' },
+};
+
+/** Respostas do formulário de lar temporário */
+export const PERIODOS_LAR_TEMPORARIO = {
+  ate_1_mes: 'Até 1 mês',
+  '1_a_3_meses': 'De 1 a 3 meses',
+  mais_de_3_meses: 'Mais de 3 meses',
+  ate_adocao: 'Até o animal ser adotado',
+} as const;

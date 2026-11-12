@@ -10,6 +10,7 @@ type Contagens = {
   adocoesPendentes: number;
   inscricoesPendentes: number;
   vagasAbertas: number;
+  mensagensSemana: number;
 };
 
 export default function Dashboard() {
@@ -24,16 +25,24 @@ export default function Dashboard() {
       contar(supabase.from('adocao').select('id, animal!inner(id_organizacao)', { count: 'exact', head: true }).eq('animal.id_organizacao', org.id).eq('status', 'em_analise')),
       contar(supabase.from('inscricao_voluntariado').select('id, vaga_voluntariado!inner(id_organizacao)', { count: 'exact', head: true }).eq('vaga_voluntariado.id_organizacao', org.id).eq('status', 'pendente')),
       contar(supabase.from('vaga_voluntariado').select('id', { count: 'exact', head: true }).eq('id_organizacao', org.id).eq('status', 'aberta')),
-    ]).then(([disponiveis, adotados, adocoesPendentes, inscricoesPendentes, vagasAbertas]) =>
-      setC({ disponiveis, adotados, adocoesPendentes, inscricoesPendentes, vagasAbertas })
+      contar(
+        supabase
+          .from('mensagem_animal')
+          .select('id, animal!inner(id_organizacao)', { count: 'exact', head: true })
+          .eq('animal.id_organizacao', org.id)
+          .gte('criado_em', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+      ),
+    ]).then(([disponiveis, adotados, adocoesPendentes, inscricoesPendentes, vagasAbertas, mensagensSemana]) =>
+      setC({ disponiveis, adotados, adocoesPendentes, inscricoesPendentes, vagasAbertas, mensagensSemana })
     );
   }, [org.id]);
 
   const cards = [
-    { label: 'Solicitações de adoção em análise', valor: c?.adocoesPendentes, to: '/admin/adocoes', destaque: true },
+    { label: 'Solicitações em análise (adoção e lar temporário)', valor: c?.adocoesPendentes, to: '/admin/adocoes', destaque: true },
     { label: 'Inscrições de voluntários pendentes', valor: c?.inscricoesPendentes, to: '/admin/voluntariado', destaque: true },
     { label: 'Animais disponíveis para adoção', valor: c?.disponiveis, to: '/admin/animais' },
     { label: 'Animais adotados', valor: c?.adotados, to: '/admin/relatorios' },
+    { label: 'Mensagens recebidas nos últimos 7 dias', valor: c?.mensagensSemana, to: '/admin/mensagens', destaque: true },
     { label: 'Vagas de voluntariado abertas', valor: c?.vagasAbertas, to: '/admin/voluntariado' },
   ];
 

@@ -36,6 +36,10 @@ const ASSUNTOS: Record<string, string> = {
   inscricao_rejeitada: 'Atualização sobre sua inscrição de voluntariado',
   mensagem_animal: 'Novas informações sobre um animal desaparecido',
   alerta_cidade: 'Novo animal na sua cidade',
+  lar_temporario_novo: 'Novo pedido de lar temporário',
+  lar_temporario_aprovada: 'Seu pedido de lar temporário foi aprovado!',
+  lar_temporario_rejeitada: 'Atualização sobre seu pedido de lar temporário',
+  pergunta_animal: 'Nova pergunta sobre um animal',
 };
 
 function env(nome: string): string {

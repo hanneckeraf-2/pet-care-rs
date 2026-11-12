@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useOutletContext, useSearchParams } from 'react-router-dom';
-import { BarChart3, Building2, ExternalLink, HandHeart, Heart, LayoutDashboard, PawPrint } from 'lucide-react';
+import { BarChart3, Building2, ExternalLink, HandHeart, Heart, LayoutDashboard, MessageCircle, PawPrint } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Tables } from '../../types/database';
@@ -21,7 +21,8 @@ export function useAdmin() {
 const itens = [
   { to: '/admin', label: 'Visão geral', icon: LayoutDashboard, end: true },
   { to: '/admin/animais', label: 'Animais', icon: PawPrint },
-  { to: '/admin/adocoes', label: 'Adoções', icon: Heart },
+  { to: '/admin/adocoes', label: 'Solicitações', icon: Heart },
+  { to: '/admin/mensagens', label: 'Mensagens', icon: MessageCircle },
   { to: '/admin/voluntariado', label: 'Voluntariado', icon: HandHeart },
   { to: '/admin/perfil', label: 'Perfil da organização', icon: Building2 },
   { to: '/admin/relatorios', label: 'Relatórios', icon: BarChart3 },

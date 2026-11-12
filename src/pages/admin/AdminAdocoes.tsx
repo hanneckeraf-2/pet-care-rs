@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, Mail, Phone } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
 import { STATUS_ADOCAO, formatarData } from '../../lib/labels';
+import { PERIODOS_LAR_TEMPORARIO, TIPO_SOLICITACAO } from '../../lib/animais';
 import type { Enums, Json } from '../../types/database';
 import { Alert, Button, Textarea } from '../../components/ui';
 import Badge from '../../components/Badge';
@@ -13,6 +14,7 @@ import { useAdmin } from './AdminLayout';
 type Solicitacao = {
   id: number;
   status: Enums<'status_adocao'>;
+  tipo: Enums<'tipo_solicitacao'>;
   criado_em: string;
   descricao: string | null;
   dados_formulario: Json;
@@ -34,10 +36,25 @@ const ROTULOS: Record<string, string> = {
   moradia: 'Moradia',
   espaco_externo: 'Espaço externo',
   outros_animais: 'Outros animais',
+  periodo: 'Período de lar temporário',
+  ajuda_custo: 'Precisa de ajuda de custo',
   motivo: 'Motivação',
 };
 
-const VALORES: Record<string, string> = { casa: 'Casa', apartamento: 'Apartamento', outro: 'Outro', sim: 'Sim', nao: 'Não' };
+const VALORES: Record<string, string> = {
+  casa: 'Casa',
+  apartamento: 'Apartamento',
+  outro: 'Outro',
+  sim: 'Sim',
+  nao: 'Não',
+  ...PERIODOS_LAR_TEMPORARIO,
+};
+
+const FILTROS_TIPO: { valor: Enums<'tipo_solicitacao'> | ''; label: string }[] = [
+  { valor: '', label: 'Todos os tipos' },
+  { valor: 'adocao', label: 'Adoção' },
+  { valor: 'lar_temporario', label: 'Lar temporário' },
+];
 
 function respostas(json: Json): [string, string][] {
   if (!json || typeof json !== 'object' || Array.isArray(json)) return [];
@@ -54,6 +71,7 @@ export default function AdminAdocoes() {
   const [params, setParams] = useSearchParams();
   const status = (params.get('status') ?? 'em_analise') as Enums<'status_adocao'> | '';
   const animalFiltro = params.get('animal');
+  const tipo = (params.get('tipo') ?? '') as Enums<'tipo_solicitacao'> | '';
   const [lista, setLista] = useState<Solicitacao[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -65,16 +83,17 @@ export default function AdminAdocoes() {
     setCarregando(true);
     let q = supabase
       .from('adocao')
-      .select('id, status, criado_em, descricao, dados_formulario, animal!inner(id, nome, id_organizacao), usuario(nome, email, telefone, cidade)')
+      .select('id, status, tipo, criado_em, descricao, dados_formulario, animal!inner(id, nome, id_organizacao), usuario(nome, email, telefone, cidade)')
       .eq('animal.id_organizacao', org.id)
       .order('criado_em', { ascending: false });
     if (status) q = q.eq('status', status);
+    if (tipo) q = q.eq('tipo', tipo);
     if (animalFiltro) q = q.eq('id_animal', Number(animalFiltro));
     const { data, error } = await q;
     if (error) setErro(traduzirErro(error));
     setLista((data as Solicitacao[] | null) ?? []);
     setCarregando(false);
-  }, [org.id, status, animalFiltro]);
+  }, [org.id, status, tipo, animalFiltro]);
 
   useEffect(() => {
     carregar();
@@ -87,10 +106,20 @@ export default function AdminAdocoes() {
     setAberta(null);
   }
 
-  async function decidir(id: number, aprovar: boolean) {
-    const texto = aprovar
-      ? 'Aprovar esta adoção? O animal será marcado como adotado e as outras solicitações em análise para ele serão recusadas.'
-      : 'Recusar esta solicitação?';
+  function mudarTipo(valor: string) {
+    const novo = new URLSearchParams(params);
+    if (valor) novo.set('tipo', valor);
+    else novo.delete('tipo');
+    setParams(novo);
+    setAberta(null);
+  }
+
+  async function decidir(id: number, aprovar: boolean, tipoSolicitacao: Enums<'tipo_solicitacao'>) {
+    const texto = !aprovar
+      ? 'Recusar esta solicitação?'
+      : tipoSolicitacao === 'lar_temporario'
+        ? 'Aprovar este lar temporário? O animal continua disponível para adoção e as outras solicitações não são afetadas.'
+        : 'Aprovar esta adoção? O animal será marcado como adotado e as outras solicitações de adoção em análise para ele serão recusadas.';
     if (!confirm(texto)) return;
     setErro(null);
     setProcessando(id);
@@ -104,7 +133,18 @@ export default function AdminAdocoes() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Solicitações de adoção</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <h2 className="text-xl font-semibold">Solicitações de adoção e lar temporário</h2>
+        <label htmlFor="filtro-tipo" className="sr-only">Tipo de solicitação</label>
+        <select
+          id="filtro-tipo"
+          value={tipo}
+          onChange={(e) => mudarTipo(e.target.value)}
+          className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm"
+        >
+          {FILTROS_TIPO.map((f) => <option key={f.label} value={f.valor}>{f.label}</option>)}
+        </select>
+      </div>
 
       <div className="flex flex-wrap gap-2 mb-4" role="tablist">
         {ABAS.map((aba) => (
@@ -147,11 +187,14 @@ export default function AdminAdocoes() {
                 >
                   <div>
                     <p className="font-semibold">
-                      {s.usuario?.nome || s.usuario?.email || 'Usuário'} <span className="font-normal text-gray-500">quer adotar</span> {s.animal.nome}
+                      {s.usuario?.nome || s.usuario?.email || 'Usuário'}{' '}
+                      <span className="font-normal text-gray-500">{s.tipo === 'lar_temporario' ? 'quer ser lar temporário de' : 'quer adotar'}</span>{' '}
+                      {s.animal.nome}
                     </p>
                     <p className="text-sm text-gray-500">{formatarData(s.criado_em)}</p>
                   </div>
                   <div className="flex items-center gap-3">
+                    <Badge {...TIPO_SOLICITACAO[s.tipo]} />
                     <Badge {...STATUS_ADOCAO[s.status]} />
                     {expandida ? <ChevronUp size={18} aria-hidden="true" /> : <ChevronDown size={18} aria-hidden="true" />}
                   </div>
@@ -183,8 +226,8 @@ export default function AdminAdocoes() {
                         </label>
                         <Textarea id={`obs-${s.id}`} rows={2} maxLength={500} value={observacao} onChange={(e) => setObservacao(e.target.value)} />
                         <div className="flex gap-2">
-                          <Button onClick={() => decidir(s.id, true)} loading={processando === s.id}>Aprovar adoção</Button>
-                          <Button variant="secondary" onClick={() => decidir(s.id, false)} disabled={processando === s.id}>Recusar</Button>
+                          <Button onClick={() => decidir(s.id, true, s.tipo)} loading={processando === s.id}>{s.tipo === 'lar_temporario' ? 'Aprovar lar temporário' : 'Aprovar adoção'}</Button>
+                          <Button variant="secondary" onClick={() => decidir(s.id, false, s.tipo)} disabled={processando === s.id}>Recusar</Button>
                         </div>
                       </div>
                     )}

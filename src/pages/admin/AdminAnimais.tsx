@@ -17,6 +17,7 @@ type Linha = {
   especie: Enums<'especie'>;
   idade_meses: number | null;
   status: Enums<'status_animal'>;
+  aceita_lar_temporario: boolean;
   cidade: string;
   foto: { url: string; ordem: number; storage_path: string | null }[];
   adocao: { count: number }[];
@@ -32,7 +33,7 @@ export default function AdminAnimais() {
   const carregar = useCallback(async () => {
     let q = supabase
       .from('animal')
-      .select('id, nome, especie, idade_meses, status, cidade, foto(url, ordem, storage_path), adocao(count)')
+      .select('id, nome, especie, idade_meses, status, cidade, aceita_lar_temporario, foto(url, ordem, storage_path), adocao(count)')
       .eq('id_organizacao', org.id)
       .eq('adocao.status', 'em_analise')
       .order('criado_em', { ascending: false });
@@ -102,6 +103,9 @@ export default function AdminAnimais() {
                 <div className="flex-1 min-w-[160px]">
                   <Link to={`/animais/${a.id}`} className="font-semibold hover:text-purple-700">{a.nome}</Link>
                   <p className="text-sm text-gray-500">{ESPECIE_LABEL[a.especie]} · {formatarIdade(a.idade_meses)} · {a.cidade}</p>
+                  {a.aceita_lar_temporario && (
+                    <span className="inline-block text-xs font-semibold bg-teal-100 text-teal-800 rounded-full px-2 py-0.5 mr-2">Precisa de lar temporário</span>
+                  )}
                   {pendentes > 0 && (
                     <Link to={`/admin/adocoes?animal=${a.id}`} className="text-xs text-purple-700 font-semibold hover:underline">
                       {pendentes} {pendentes === 1 ? 'solicitação' : 'solicitações'} em análise

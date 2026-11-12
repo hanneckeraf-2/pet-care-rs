@@ -85,6 +85,7 @@ export type Database = {
           descricao: string | null;
           data_desaparecimento: string | null;
           ultimo_local_visto: string | null;
+          aceita_lar_temporario: boolean;
         } & Timestamps;
         Insert: {
           nome: string;
@@ -101,6 +102,7 @@ export type Database = {
           descricao?: string | null;
           data_desaparecimento?: string | null;
           ultimo_local_visto?: string | null;
+          aceita_lar_temporario?: boolean;
         };
         Update: Partial<Database['public']['Tables']['animal']['Insert']>;
         Relationships: [
@@ -142,6 +144,7 @@ export type Database = {
           id_usuario: string;
           id_animal: number;
           status: Database['public']['Enums']['status_adocao'];
+          tipo: Database['public']['Enums']['tipo_solicitacao'];
           dados_formulario: Json;
           descricao: string | null;
         } & Timestamps;
@@ -149,6 +152,7 @@ export type Database = {
           id_usuario: string;
           id_animal: number;
           status?: Database['public']['Enums']['status_adocao'];
+          tipo?: Database['public']['Enums']['tipo_solicitacao'];
           dados_formulario?: Json;
           descricao?: string | null;
         };
@@ -290,6 +294,7 @@ export type Database = {
       disponibilidade: 'dias_uteis' | 'finais_de_semana' | 'flexivel';
       status_vaga: 'aberta' | 'encerrada';
       status_inscricao: 'pendente' | 'aprovada' | 'rejeitada' | 'cancelada';
+      tipo_solicitacao: 'adocao' | 'lar_temporario';
     };
     CompositeTypes: { [_ in never]: never };
   };

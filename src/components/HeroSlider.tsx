@@ -28,7 +28,7 @@ const slides: Slide[] = [
     image: 'https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?auto=format&fit=crop&q=80&w=1920',
     actions: [
       { label: 'Encontre Abrigos', to: '/organizacoes' },
-      { label: 'Oferecer Lar Temporário', to: '/organizacoes' },
+      { label: 'Oferecer Lar Temporário', to: '/animais?lar_temporario=1' },
     ],
   },
   {

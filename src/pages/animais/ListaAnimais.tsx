@@ -9,7 +9,7 @@ import PetCard, { PetCardSkeleton } from '../../components/PetCard';
 import { Alert, Field, Input, Select } from '../../components/ui';
 import { useAuth } from '../../contexts/AuthContext';
 
-const CHAVES_FILTRO = ['q', 'especie', 'idade', 'cidade', 'organizacao', 'porte', 'sexo'] as const;
+const CHAVES_FILTRO = ['q', 'especie', 'idade', 'cidade', 'organizacao', 'porte', 'sexo', 'lar_temporario'] as const;
 
 export default function ListaAnimais() {
   const [params, setParams] = useSearchParams();
@@ -121,6 +121,15 @@ export default function ListaAnimais() {
           {Object.entries(SEXO_LABEL).filter(([v]) => v !== 'desconhecido').map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </Select>
       </Field>
+      <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
+        <input
+          type="checkbox"
+          className="mt-0.5 w-4 h-4 accent-purple-600"
+          checked={filtros.lar_temporario === '1'}
+          onChange={(e) => atualizar('lar_temporario', e.target.checked ? '1' : '')}
+        />
+        Só animais que precisam de lar temporário
+      </label>
       {filtrosAtivos > 0 && (
         <button onClick={limpar} className="text-sm text-purple-700 font-semibold hover:underline flex items-center gap-1">
           <X size={14} aria-hidden="true" /> Limpar filtros

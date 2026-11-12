@@ -8,6 +8,7 @@ import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
 import { CIDADES } from '../../lib/constants';
 import { STATUS_ADOCAO, STATUS_INSCRICAO, formatarData } from '../../lib/labels';
+import { TIPO_SOLICITACAO } from '../../lib/animais';
 import { useAuth } from '../../contexts/AuthContext';
 import { Alert, Button, Card, Field, Input, Select } from '../../components/ui';
 import Badge from '../../components/Badge';
@@ -30,6 +31,7 @@ type Adocao = {
   id: number;
   status: Enums<'status_adocao'>;
   criado_em: string;
+  tipo: Enums<'tipo_solicitacao'>;
   animal: { id: number; nome: string } | null;
 };
 type Inscricao = {
@@ -68,7 +70,7 @@ export default function Perfil() {
     const [ad, ins] = await Promise.all([
       supabase
         .from('adocao')
-        .select('id, status, criado_em, animal(id, nome)')
+        .select('id, status, criado_em, tipo, animal(id, nome)')
         .eq('id_usuario', user.id)
         .order('criado_em', { ascending: false }),
       supabase
@@ -106,7 +108,7 @@ export default function Perfil() {
   }
 
   async function cancelarAdocao(id: number) {
-    if (!confirm('Cancelar esta solicitação de adoção?')) return;
+    if (!confirm('Cancelar esta solicitação?')) return;
     const { error } = await supabase.from('adocao').update({ status: 'cancelada' }).eq('id', id);
     if (error) return setErro(traduzirErro(error));
     carregarHistorico();
@@ -170,11 +172,11 @@ export default function Perfil() {
 
       <Card className="mb-8">
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Heart className="text-purple-600" size={20} aria-hidden="true" /> Minhas solicitações de adoção
+          <Heart className="text-purple-600" size={20} aria-hidden="true" /> Minhas solicitações de adoção e lar temporário
         </h2>
         {adocoes.length === 0 ? (
           <p className="text-gray-600">
-            Você ainda não solicitou nenhuma adoção. <Link to="/animais" className="text-purple-700 font-semibold hover:underline">Conheça os animais</Link>
+            Você ainda não fez nenhuma solicitação. <Link to="/animais" className="text-purple-700 font-semibold hover:underline">Conheça os animais</Link>
           </p>
         ) : (
           <ul className="divide-y divide-gray-100">
@@ -189,6 +191,7 @@ export default function Perfil() {
                   <span className="text-sm text-gray-500 ml-2">{formatarData(a.criado_em)}</span>
                 </div>
                 <div className="flex items-center gap-3">
+                  <Badge {...TIPO_SOLICITACAO[a.tipo]} />
                   <Badge {...STATUS_ADOCAO[a.status]} />
                   {a.status === 'em_analise' && (
                     <button onClick={() => cancelarAdocao(a.id)} className="text-sm text-red-600 hover:underline">Cancelar</button>

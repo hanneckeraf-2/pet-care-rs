@@ -28,6 +28,7 @@ const schema = z.object({
   cidade: z.string().min(1, { error: 'Selecione a cidade.' }),
   local: z.string().trim().max(120),
   descricao: z.string().trim().max(2000),
+  aceita_lar_temporario: z.boolean(),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -51,7 +52,7 @@ export default function AnimalForm() {
     resolver: zodResolver(schema),
     defaultValues: {
       nome: '', raca: '', sexo: 'desconhecido', porte: '', idade_anos: '', idade_meses_extra: '',
-      status: 'disponivel', cidade: org.cidade, local: '', descricao: '',
+      status: 'disponivel', cidade: org.cidade, local: '', descricao: '', aceita_lar_temporario: false,
     },
   });
 
@@ -81,6 +82,7 @@ export default function AnimalForm() {
             cidade: data.cidade,
             local: data.local ?? '',
             descricao: data.descricao ?? '',
+            aceita_lar_temporario: data.aceita_lar_temporario,
           });
           setFotosExistentes(data.foto);
         }
@@ -112,6 +114,7 @@ export default function AnimalForm() {
       cidade: d.cidade,
       local: d.local || null,
       descricao: d.descricao || null,
+      aceita_lar_temporario: d.aceita_lar_temporario,
     };
 
     let idSalvo = animalId;
@@ -203,6 +206,15 @@ export default function AnimalForm() {
               <Textarea id="descricao" rows={4} {...register('descricao')} />
             </Field>
           </div>
+          <label className="mt-4 flex items-start gap-3 rounded-md border border-teal-200 bg-teal-50 p-3 cursor-pointer">
+            <input type="checkbox" className="mt-0.5 w-4 h-4 accent-teal-600" {...register('aceita_lar_temporario')} />
+            <span className="text-sm">
+              <span className="block font-semibold text-teal-900">Precisa de lar temporário</span>
+              <span className="text-teal-800">
+                Mostra o botão "Quero ser Lar Temporário" na página do animal, para quem não pode adotar acolhê-lo por um período.
+              </span>
+            </span>
+          </label>
         </Card>
 
         <Card>

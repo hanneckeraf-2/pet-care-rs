@@ -178,7 +178,7 @@ await as(U_MARIA, async () => {
 });
 await as(U_OUTRO, async () => {
   await expectErr('não envia mensagem para animal reunido', `insert into public.mensagem_animal (id_animal,id_remetente,mensagem) values ((select id from public.animal where nome='Mingau'),'${U_OUTRO}','oi')`);
-  await expectErr('não envia mensagem para animal de adoção', `insert into public.mensagem_animal (id_animal,id_remetente,mensagem) values (${luna},'${U_OUTRO}','oi')`);
+  await expectErr('não envia pergunta para animal já adotado', `insert into public.mensagem_animal (id_animal,id_remetente,mensagem) values (${max},'${U_OUTRO}','oi')`);
   await expectOk('outro não apaga mensagens alheias', `delete from public.mensagem_animal returning id`, (r) => r.length === 0);
 });
 
@@ -234,6 +234,35 @@ await as(U_MARIA, async () => {
 await expectOk('admin do sistema é notificado da adoção', `select count(*)::int c from public.notificacao where id_usuario='${U_SIS}' and tipo='adocao_nova'`, (r) => r[0].c >= 1);
 await expectOk('ana (outra ONG) não é notificada do Pipoca', `select count(*)::int c from public.notificacao where id_usuario='${U_ANA}' and mensagem like '%Pipoca%'`, (r) => r[0].c === 0);
 await db.exec(`select set_config('request.jwt.claim.sub', '', false); delete from auth.users where id='${U_SIS}';`);
+
+// ---- Lar temporário e perguntas sobre animais das organizações ----
+const thor = (await db.query(`select id from public.animal where nome='Thor'`)).rows[0].id; // Lar Temporário Esperança
+await as(U_OUTRO, async () => {
+  await expectErr('não pede lar temporário se o animal não precisa', `insert into public.adocao (id_usuario,id_animal,tipo) values ('${U_OUTRO}', ${thor}, 'lar_temporario')`);
+});
+await expectOk('[setup] Thor precisa de lar temporário', `update public.animal set aceita_lar_temporario=true where id=${thor} returning id`, (r) => r.length === 1);
+await db.exec(`select set_config('request.jwt.claim.sub', '', false);
+               update public.usuario set id_organizacao=(select id from public.organizacao where nome='Lar Temporário Esperança') where id='${U_ANA}';`);
+await as(U_OUTRO, async () => {
+  await expectOk('pede lar temporário do Thor', `insert into public.adocao (id_usuario,id_animal,tipo,dados_formulario) values ('${U_OUTRO}', ${thor}, 'lar_temporario', '{"periodo":"1 a 3 meses"}')`);
+  await expectOk('pede também a adoção do Thor', `insert into public.adocao (id_usuario,id_animal,tipo) values ('${U_OUTRO}', ${thor}, 'adocao')`);
+  await expectErr('não duplica pedido de lar temporário', `insert into public.adocao (id_usuario,id_animal,tipo) values ('${U_OUTRO}', ${thor}, 'lar_temporario')`);
+  await expectOk('pergunta sobre animal de ONG', `insert into public.mensagem_animal (id_animal,id_remetente,mensagem,contato_retorno) values (${thor},'${U_OUTRO}','Ele se dá bem com gatos?','51 99999-9999')`);
+});
+await expectOk('admin do Lar Esperança é avisado do pedido de LT', `select count(*)::int c from public.notificacao where id_usuario='${U_ANA}' and tipo='lar_temporario_novo' and mensagem like '%lar temporário de Thor%'`, (r) => r[0].c === 1);
+const pedidoLT = (await db.query(`select id from public.adocao where id_animal=${thor} and tipo='lar_temporario'`)).rows[0].id;
+await expectOk('pergunta notifica a ONG com link para /admin/mensagens', `select count(*)::int c from public.notificacao where id_usuario='${U_ANA}' and tipo='pergunta_animal' and link='/admin/mensagens'`, (r) => r[0].c === 1);
+await as(U_ANA, async () => {
+  await expectOk('ana lê a pergunta sobre o Thor', `select count(*)::int c from public.mensagem_animal where id_animal=${thor}`, (r) => r[0].c === 1);
+  await expectOk('ana aprova o lar temporário', `select public.decidir_adocao(${pedidoLT}, true, 'Combinado!')`);
+});
+await expectOk('LT aprovado não adota o animal nem recusa a adoção pendente',
+  `select (select status::text from public.animal where id=${thor}) a,
+          (select status::text from public.adocao where id_animal=${thor} and tipo='adocao') ad,
+          (select count(*)::int from public.notificacao where id_usuario='${U_OUTRO}' and tipo='lar_temporario_aprovada') n`,
+  (r) => r[0].a === 'disponivel' && r[0].ad === 'em_analise' && r[0].n === 1);
+await db.exec(`select set_config('request.jwt.claim.sub', '', false);
+               update public.usuario set id_organizacao=(select id from public.organizacao where nome='Abrigo Patas Unidas') where id='${U_ANA}';`);
 
 await as(null, async () => {
   await expectErr('anon não exclui conta', `select public.excluir_minha_conta()`);
