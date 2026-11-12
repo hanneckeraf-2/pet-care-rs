@@ -10,6 +10,7 @@ import { removerArquivos } from '../../lib/upload';
 import { useAuth } from '../../contexts/AuthContext';
 import { Alert, Button, Card, Field, Input, Textarea } from '../../components/ui';
 import Badge from '../../components/Badge';
+import BotaoCompartilhar from '../../components/BotaoCompartilhar';
 import Spinner from '../../components/Spinner';
 import NotFound from '../NotFound';
 
@@ -198,6 +199,16 @@ export default function DetalheDesaparecido() {
           <div className="flex flex-wrap items-center gap-3 mb-1">
             <h1 className="text-4xl font-bold">{registro.nome}</h1>
             <Badge {...STATUS_ANIMAL[registro.status]} />
+          </div>
+          <div className="mb-3">
+            <BotaoCompartilhar
+              titulo={`${registro.nome} | Pet Care RS`}
+              texto={
+                registro.status === 'perdido'
+                  ? `Ajude a encontrar ${registro.nome}! Desapareceu em ${registro.cidade}. Viu este animal?`
+                  : `Animal encontrado em ${registro.cidade}. Ajude a encontrar a família:`
+              }
+            />
           </div>
           <p className="text-gray-500 text-sm mb-6">
             Registrado em {formatarData(registro.criado_em)}

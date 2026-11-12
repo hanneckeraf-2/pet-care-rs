@@ -10,6 +10,7 @@ import type { Tables } from '../../types/database';
 import { Alert, Card } from '../../components/ui';
 import PetCard from '../../components/PetCard';
 import VagaCard from '../../components/VagaCard';
+import BotaoCompartilhar from '../../components/BotaoCompartilhar';
 import Spinner from '../../components/Spinner';
 import NotFound from '../NotFound';
 
@@ -97,6 +98,12 @@ export default function PaginaOrganizacao() {
             <p className="flex items-center gap-1 text-white/90 mt-1">
               <MapPin size={16} aria-hidden="true" /> {[org.endereco, org.cidade].filter(Boolean).join(' · ')}
             </p>
+            <div className="mt-3">
+              <BotaoCompartilhar
+                titulo={`${org.nome} | Pet Care RS`}
+                texto={`Conheça o trabalho de ${org.nome} e os animais que esperam por uma família:`}
+              />
+            </div>
           </div>
         </div>
       </div>

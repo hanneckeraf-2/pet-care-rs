@@ -12,6 +12,7 @@ import Badge from '../../components/Badge';
 import Spinner from '../../components/Spinner';
 import NotFound from '../NotFound';
 import SolicitarAdocao from './SolicitarAdocao';
+import BotaoCompartilhar from '../../components/BotaoCompartilhar';
 import { lerContatos } from '../../lib/organizacoes';
 import PerguntaAnimal from './PerguntaAnimal';
 import type { Enums } from '../../types/database';
@@ -194,7 +195,17 @@ export default function DetalheAnimal() {
             <h1 className="text-4xl font-bold">{animal.nome}</h1>
             <Badge {...STATUS_ANIMAL[animal.status]} />
           </div>
-          <p className="text-gray-500 text-sm mb-6">Cadastrado em {formatarData(animal.criado_em)}</p>
+          <p className="text-gray-500 text-sm mb-4">Cadastrado em {formatarData(animal.criado_em)}</p>
+          <div className="mb-6">
+            <BotaoCompartilhar
+              titulo={`${animal.nome} | Pet Care RS`}
+              texto={
+                animal.status === 'adotado'
+                  ? `${animal.nome} encontrou uma família pelo Pet Care RS!`
+                  : `Conheça ${animal.nome}, que está esperando por uma família no Pet Care RS:`
+              }
+            />
+          </div>
           {gerencia && (
             <Link
               to={`/admin/animais/${animal.id}/editar?org=${animal.id_organizacao}`}
