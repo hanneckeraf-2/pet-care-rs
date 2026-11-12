@@ -4,6 +4,9 @@ import type { Enums } from '../types/database';
 
 export const POR_PAGINA = 12;
 
+/** Situações em que o animal pode receber pedidos de adoção ("em lar temporário" continua adotável) */
+export const STATUS_ADOTAVEIS: Enums<'status_animal'>[] = ['disponivel', 'em_processo', 'em_lar_temporario'];
+
 export const ESPECIE_LABEL: Record<Enums<'especie'>, string> = {
   cachorro: 'Cachorro',
   gato: 'Gato',
@@ -71,7 +74,7 @@ export async function buscarAnimaisParaAdocao(filtros: FiltrosAnimais, pagina: n
   let query = supabase
     .from('animal')
     .select(ANIMAL_CARD_SELECT, { count: 'exact' })
-    .in('status', ['disponivel', 'em_processo'])
+    .in('status', STATUS_ADOTAVEIS)
     .not('id_organizacao', 'is', null);
 
   if (filtros.especie) query = query.eq('especie', filtros.especie as Enums<'especie'>);
@@ -92,7 +95,7 @@ export async function buscarAnimaisParaAdocao(filtros: FiltrosAnimais, pagina: n
 
   const inicio = (pagina - 1) * POR_PAGINA;
   return query
-    .order('status', { ascending: true }) // 'disponivel' antes de 'em_processo'
+    .order('status', { ascending: true }) // ordem do enum: disponível, em processo, ..., em lar temporário
     .order('criado_em', { ascending: false })
     .range(inicio, inicio + POR_PAGINA - 1);
 }
@@ -133,7 +136,7 @@ export async function buscarDesaparecidos(filtros: FiltrosDesaparecidos, pagina:
 }
 
 /** Status que uma organização pode atribuir aos seus animais */
-export const STATUS_EDITAVEIS_ORG: Enums<'status_animal'>[] = ['disponivel', 'em_processo', 'adotado', 'resgatado', 'encontrado', 'reunido'];
+export const STATUS_EDITAVEIS_ORG: Enums<'status_animal'>[] = ['disponivel', 'em_processo', 'em_lar_temporario', 'adotado', 'resgatado', 'encontrado', 'reunido'];
 
 export const TIPO_SOLICITACAO: Record<Enums<'tipo_solicitacao'>, { label: string; cor: string }> = {
   adocao: { label: 'Adoção', cor: 'bg-purple-100 text-purple-800' },

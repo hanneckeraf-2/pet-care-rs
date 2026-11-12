@@ -17,6 +17,7 @@ export const STATUS_INSCRICAO: Record<Enums<'status_inscricao'>, { label: string
 export const STATUS_ANIMAL: Record<Enums<'status_animal'>, { label: string; cor: string }> = {
   disponivel: { label: 'Disponível', cor: 'bg-green-100 text-green-800' },
   em_processo: { label: 'Em processo de adoção', cor: 'bg-yellow-100 text-yellow-800' },
+  em_lar_temporario: { label: 'Em lar temporário', cor: 'bg-cyan-100 text-cyan-800' },
   adotado: { label: 'Adotado', cor: 'bg-purple-100 text-purple-800' },
   perdido: { label: 'Perdido', cor: 'bg-red-100 text-red-800' },
   encontrado: { label: 'Encontrado', cor: 'bg-blue-100 text-blue-800' },

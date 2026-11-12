@@ -78,7 +78,7 @@ export default function AdminMensagens() {
       ) : (
         <ul className="space-y-3">
           {mensagens.map((m) => {
-            const linkAnimal = ['disponivel', 'em_processo', 'adotado'].includes(m.animal.status)
+            const linkAnimal = ['disponivel', 'em_processo', 'em_lar_temporario', 'adotado'].includes(m.animal.status)
               ? `/animais/${m.animal.id}`
               : `/desaparecidos/${m.animal.id}`;
             return (

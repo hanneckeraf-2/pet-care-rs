@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Building2, Check, Copy, Facebook, Globe, HandCoins, Instagram, Mail, MapPin, MessageCircle, Phone, Users } from 'lucide-react';
+import { ArrowLeft, Building2, Check, Copy, Facebook, Globe, HandCoins, Instagram, Mail, MapPin, MessageCircle, PartyPopper, PawPrint, Phone, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
-import { ANIMAL_CARD_SELECT, type AnimalCard } from '../../lib/animais';
+import { ANIMAL_CARD_SELECT, STATUS_ADOTAVEIS, fotoPrincipal, type AnimalCard } from '../../lib/animais';
 import { VAGA_SELECT, lerContatos, type Vaga } from '../../lib/organizacoes';
 import { useMinhasInscricoes } from '../../hooks/useMinhasInscricoes';
 import type { Tables } from '../../types/database';
@@ -32,7 +32,7 @@ export default function PaginaOrganizacao() {
         .from('animal')
         .select(ANIMAL_CARD_SELECT)
         .eq('id_organizacao', orgId)
-        .in('status', ['disponivel', 'em_processo', 'resgatado'])
+        .in('status', ['disponivel', 'em_processo', 'em_lar_temporario', 'resgatado', 'adotado'])
         .order('criado_em', { ascending: false }),
       supabase
         .from('vaga_voluntariado')
@@ -55,8 +55,9 @@ export default function PaginaOrganizacao() {
   if (!org) return <NotFound />;
 
   const contatos = lerContatos(org.contatos);
-  const paraAdocao = animais.filter((a) => a.status !== 'resgatado');
+  const paraAdocao = animais.filter((a) => STATUS_ADOTAVEIS.includes(a.status));
   const resgatados = animais.filter((a) => a.status === 'resgatado');
+  const adotados = animais.filter((a) => a.status === 'adotado');
 
   async function copiarPix() {
     if (!org?.pix_doacao) return;
@@ -182,6 +183,35 @@ export default function PaginaOrganizacao() {
             <p className="text-gray-600 mb-6">Reconhece algum destes animais? Entre em contato.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {resgatados.map((a) => <PetCard key={a.id} animal={a} to={`/desaparecidos/${a.id}`} acao="Ver detalhes" />)}
+            </div>
+          </section>
+        )}
+
+        {adotados.length > 0 && (
+          <section className="mb-12" aria-labelledby="t-adotados">
+            <h2 id="t-adotados" className="text-2xl font-bold mb-2 flex items-center gap-2">
+              <PartyPopper className="text-purple-600" aria-hidden="true" /> Já encontraram um lar ({adotados.length})
+            </h2>
+            <p className="text-gray-600 mb-6">Finais felizes graças a quem adotou com {org.nome}.</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+              {adotados.map((a) => {
+                const foto = fotoPrincipal(a.foto);
+                return (
+                  <Link key={a.id} to={`/animais/${a.id}`} className="group block bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
+                    <div className="aspect-square bg-gray-100">
+                      {foto ? (
+                        <img src={foto} alt={`Foto de ${a.nome}`} className="w-full h-full object-cover" loading="lazy" />
+                      ) : (
+                        <PawPrint className="w-full h-full p-8 text-gray-300" aria-hidden="true" />
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <p className="font-semibold group-hover:text-purple-700 truncate">{a.nome}</p>
+                      <p className="text-xs text-purple-700 font-medium">Adotado 💜</p>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </section>
         )}

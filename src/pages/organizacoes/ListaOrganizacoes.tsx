@@ -4,6 +4,7 @@ import { Building2, MapPin, Search } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
 import { CIDADES } from '../../lib/constants';
+import { STATUS_ADOTAVEIS } from '../../lib/animais';
 import { Alert, Input, Select } from '../../components/ui';
 import Spinner from '../../components/Spinner';
 
@@ -30,7 +31,7 @@ export default function ListaOrganizacoes() {
     let query = supabase
       .from('organizacao')
       .select('id, nome, cidade, descricao, foto_url, animal(count), vaga_voluntariado(count)')
-      .in('animal.status', ['disponivel', 'em_processo'])
+      .in('animal.status', STATUS_ADOTAVEIS)
       .eq('vaga_voluntariado.status', 'aberta')
       .order('nome');
     if (cidade) query = query.eq('cidade', cidade);

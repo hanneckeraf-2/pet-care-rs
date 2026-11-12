@@ -24,7 +24,7 @@ const schema = z.object({
   porte: z.union([z.enum(['pequeno', 'medio', 'grande']), z.literal('')]),
   idade_anos: z.string().regex(/^\d{0,2}$/, { error: 'Número de anos inválido.' }),
   idade_meses_extra: z.string().regex(/^(\d|1[01])?$/, { error: 'Meses de 0 a 11.' }),
-  status: z.enum(['disponivel', 'em_processo', 'adotado', 'resgatado', 'encontrado', 'reunido']),
+  status: z.enum(['disponivel', 'em_processo', 'em_lar_temporario', 'adotado', 'resgatado', 'encontrado', 'reunido']),
   cidade: z.string().min(1, { error: 'Selecione a cidade.' }),
   local: z.string().trim().max(120),
   descricao: z.string().trim().max(2000),

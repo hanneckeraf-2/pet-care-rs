@@ -256,11 +256,22 @@ await as(U_ANA, async () => {
   await expectOk('ana lê a pergunta sobre o Thor', `select count(*)::int c from public.mensagem_animal where id_animal=${thor}`, (r) => r[0].c === 1);
   await expectOk('ana aprova o lar temporário', `select public.decidir_adocao(${pedidoLT}, true, 'Combinado!')`);
 });
-await expectOk('LT aprovado não adota o animal nem recusa a adoção pendente',
+await expectOk('LT aprovado: animal fica em lar temporário, sem recusar a adoção pendente',
   `select (select status::text from public.animal where id=${thor}) a,
+          (select aceita_lar_temporario from public.animal where id=${thor}) precisa,
           (select status::text from public.adocao where id_animal=${thor} and tipo='adocao') ad,
           (select count(*)::int from public.notificacao where id_usuario='${U_OUTRO}' and tipo='lar_temporario_aprovada') n`,
-  (r) => r[0].a === 'disponivel' && r[0].ad === 'em_analise' && r[0].n === 1);
+  (r) => r[0].a === 'em_lar_temporario' && r[0].precisa === false && r[0].ad === 'em_analise' && r[0].n === 1);
+await as(U_MARIA, async () => {
+  await expectOk('animal em lar temporário continua adotável', `insert into public.adocao (id_usuario,id_animal,tipo) values ('${U_MARIA}', ${thor}, 'adocao') returning id`, (r) => r.length === 1);
+  await expectErr('animal em lar temporário não recebe novo pedido de LT', `insert into public.adocao (id_usuario,id_animal,tipo) values ('${U_MARIA}', ${thor}, 'lar_temporario')`);
+  await expectOk('pergunta sobre animal em lar temporário', `insert into public.mensagem_animal (id_animal,id_remetente,mensagem) values (${thor},'${U_MARIA}','Onde ele está?') returning id`, (r) => r.length === 1);
+});
+await as(U_ANA, async () => {
+  const adocaoThor = (await db.query(`select id from public.adocao where id_animal=${thor} and tipo='adocao' and id_usuario='${U_OUTRO}'`)).rows[0].id;
+  await expectOk('ana aprova a adoção do Thor (em lar temporário)', `select public.decidir_adocao(${adocaoThor}, true, null)`);
+});
+await expectOk('adoção aprovada tira o animal do lar temporário', `select status::text s from public.animal where id=${thor}`, (r) => r[0].s === 'adotado');
 await db.exec(`select set_config('request.jwt.claim.sub', '', false);
                update public.usuario set id_organizacao=(select id from public.organizacao where nome='Abrigo Patas Unidas') where id='${U_ANA}';`);
 
@@ -270,7 +281,7 @@ await as(null, async () => {
 await as(U_OUTRO, async () => {
   await expectOk('outro exclui a própria conta', `select public.excluir_minha_conta()`);
 });
-await expectOk('só a conta do outro foi removida', `select (select count(*)::int from auth.users) a, (select count(*)::int from public.usuario) u, (select count(*)::int from public.mensagem_animal) m`,
+await expectOk('só a conta do outro foi removida', `select (select count(*)::int from auth.users) a, (select count(*)::int from public.usuario) u, (select count(*)::int from public.mensagem_animal where id_remetente='${U_OUTRO}') m`,
   (r) => r[0].a === 2 && r[0].u === 2 && r[0].m === 0);
 console.log(failures ? `\n${failures} FALHA(S)` : '\nTodos os testes passaram');
 process.exit(failures ? 1 : 0);

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Plus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAdmin } from './AdminLayout';
+import { STATUS_ADOTAVEIS } from '../../lib/animais';
 
 type Contagens = {
   disponiveis: number;
@@ -20,7 +21,7 @@ export default function Dashboard() {
   useEffect(() => {
     const contar = async (q: PromiseLike<{ count: number | null }>) => (await q).count ?? 0;
     Promise.all([
-      contar(supabase.from('animal').select('id', { count: 'exact', head: true }).eq('id_organizacao', org.id).in('status', ['disponivel', 'em_processo'])),
+      contar(supabase.from('animal').select('id', { count: 'exact', head: true }).eq('id_organizacao', org.id).in('status', STATUS_ADOTAVEIS)),
       contar(supabase.from('animal').select('id', { count: 'exact', head: true }).eq('id_organizacao', org.id).eq('status', 'adotado')),
       contar(supabase.from('adocao').select('id, animal!inner(id_organizacao)', { count: 'exact', head: true }).eq('animal.id_organizacao', org.id).eq('status', 'em_analise')),
       contar(supabase.from('inscricao_voluntariado').select('id, vaga_voluntariado!inner(id_organizacao)', { count: 'exact', head: true }).eq('vaga_voluntariado.id_organizacao', org.id).eq('status', 'pendente')),

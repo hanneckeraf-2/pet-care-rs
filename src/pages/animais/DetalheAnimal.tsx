@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import type { QueryData } from '@supabase/supabase-js';
-import { ArrowLeft, Building2, Calendar, CheckCircle2, Heart, Home, Mail, MapPin, MessageCircle, PawPrint, Pencil, Phone, Ruler, Tag } from 'lucide-react';
+import { ArrowLeft, Building2, Calendar, CheckCircle2, Heart, Home, Mail, MapPin, MessageCircle, PartyPopper, PawPrint, Pencil, Phone, Ruler, Tag } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
-import { ESPECIE_LABEL, PORTE_LABEL, SEXO_LABEL, formatarIdade } from '../../lib/animais';
+import { ESPECIE_LABEL, PORTE_LABEL, SEXO_LABEL, STATUS_ADOTAVEIS, formatarIdade } from '../../lib/animais';
 import { STATUS_ADOCAO, STATUS_ANIMAL, formatarData } from '../../lib/labels';
 import { useAuth } from '../../contexts/AuthContext';
 import { Alert, Button, Card } from '../../components/ui';
@@ -82,7 +82,7 @@ export default function DetalheAnimal() {
   }
 
   const fotos = animal.foto;
-  const disponivelParaAdocao = !!animal.organizacao && (animal.status === 'disponivel' || animal.status === 'em_processo');
+  const disponivelParaAdocao = !!animal.organizacao && STATUS_ADOTAVEIS.includes(animal.status);
   const aceitaLarTemporario = disponivelParaAdocao && animal.aceita_lar_temporario;
   const gerencia =
     animal.id_organizacao !== null &&
@@ -245,6 +245,16 @@ export default function DetalheAnimal() {
             </div>
           )}
 
+          {animal.status === 'em_lar_temporario' && (
+            <div className="flex gap-3 bg-cyan-50 border border-cyan-200 text-cyan-900 rounded-lg p-4 mb-4 text-sm">
+              <Home className="shrink-0 text-cyan-700" size={20} aria-hidden="true" />
+              <p>
+                <strong>{animal.nome} está em um lar temporário</strong> enquanto espera por uma família definitiva. Ele continua
+                disponível para adoção!
+              </p>
+            </div>
+          )}
+
           {aceitaLarTemporario && (
             <div className="flex gap-3 bg-teal-50 border border-teal-200 text-teal-900 rounded-lg p-4 mb-4 text-sm">
               <Home className="shrink-0 text-teal-700" size={20} aria-hidden="true" />
@@ -267,7 +277,14 @@ export default function DetalheAnimal() {
               </div>
             </div>
           ) : animal.organizacao ? (
-            <p className="text-gray-600">Este animal não está mais disponível para adoção.</p>
+            animal.status === 'adotado' ? (
+              <div className="flex items-center gap-3 bg-purple-50 border border-purple-200 text-purple-900 rounded-lg p-4">
+                <PartyPopper className="shrink-0 text-purple-600" aria-hidden="true" />
+                <p><strong>Final feliz!</strong> {animal.nome} já foi adotado e encontrou uma família.</p>
+              </div>
+            ) : (
+              <p className="text-gray-600">Este animal não está mais disponível para adoção.</p>
+            )
           ) : (
             <p className="text-gray-600">
               Este é um registro de animal desaparecido.{' '}
