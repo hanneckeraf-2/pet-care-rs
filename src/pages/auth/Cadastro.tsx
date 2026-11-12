@@ -7,7 +7,7 @@ import { MailCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
 import { useAuth } from '../../contexts/AuthContext';
-import { AuthCard, Divisor, GoogleButton } from '../../components/AuthCard';
+import { AuthCard, AvisoTermos, Divisor, GoogleButton } from '../../components/AuthCard';
 import { Alert, Button, Field, Input } from '../../components/ui';
 
 const schema = z
@@ -16,6 +16,7 @@ const schema = z
     email: z.email({ error: 'Informe um e-mail válido.' }),
     senha: z.string().min(8, { error: 'A senha deve ter pelo menos 8 caracteres.' }),
     confirmar: z.string(),
+    aceite: z.literal(true, { error: 'Para criar a conta, é preciso aceitar os Termos de Uso e a Política de Privacidade.' }),
   })
   .refine((d) => d.senha === d.confirmar, { path: ['confirmar'], error: 'As senhas não conferem.' });
 type FormData = z.infer<typeof schema>;
@@ -71,6 +72,7 @@ export default function Cadastro() {
       {erro && <div className="mb-4"><Alert type="error">{erro}</Alert></div>}
 
       <GoogleButton redirectPath={destino} onError={setErro} />
+      <AvisoTermos />
       <Divisor />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
@@ -86,6 +88,17 @@ export default function Cadastro() {
         <Field id="confirmar" label="Confirmar senha" error={errors.confirmar?.message}>
           <Input id="confirmar" type="password" autoComplete="new-password" invalid={!!errors.confirmar} {...register('confirmar')} />
         </Field>
+        <div>
+          <label className="flex items-start gap-2 text-sm text-gray-700">
+            <input type="checkbox" className="mt-0.5 w-4 h-4 accent-purple-600" {...register('aceite')} />
+            <span>
+              Tenho 18 anos ou mais e li e aceito os{' '}
+              <Link to="/termos" target="_blank" className="text-purple-700 underline">Termos de Uso</Link> e a{' '}
+              <Link to="/privacidade" target="_blank" className="text-purple-700 underline">Política de Privacidade</Link>.
+            </span>
+          </label>
+          {errors.aceite && <p className="mt-1 text-sm text-red-600" role="alert">{errors.aceite.message}</p>}
+        </div>
         <Button type="submit" loading={isSubmitting} className="w-full">Criar conta</Button>
       </form>
 

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { PawPrint } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { traduzirErro } from '../lib/erros';
@@ -53,5 +54,16 @@ export function GoogleButton({ redirectPath = '/', onError }: { redirectPath?: s
       </svg>
       Continuar com Google
     </button>
+  );
+}
+
+/** Aviso exibido junto ao login social, que cria a conta no primeiro acesso. */
+export function AvisoTermos() {
+  return (
+    <p className="text-xs text-gray-500 text-center mt-2">
+      Ao continuar com o Google, você declara ter 18 anos ou mais e aceita os{' '}
+      <Link to="/termos" className="underline">Termos de Uso</Link> e a{' '}
+      <Link to="/privacidade" className="underline">Política de Privacidade</Link>.
+    </p>
   );
 }

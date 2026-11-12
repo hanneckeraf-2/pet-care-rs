@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
 import { useAuth } from '../../contexts/AuthContext';
-import { AuthCard, Divisor, GoogleButton } from '../../components/AuthCard';
+import { AuthCard, AvisoTermos, Divisor, GoogleButton } from '../../components/AuthCard';
 import { Alert, Button, Field, Input } from '../../components/ui';
 
 const schema = z.object({
@@ -38,6 +38,7 @@ export default function Entrar() {
       {erro && <div className="mb-4"><Alert type="error">{erro}</Alert></div>}
 
       <GoogleButton redirectPath={destino} onError={setErro} />
+      <AvisoTermos />
       <Divisor />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>

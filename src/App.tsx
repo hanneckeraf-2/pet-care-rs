@@ -35,6 +35,8 @@ const AdminVoluntariado = lazy(() => import('./pages/admin/AdminVoluntariado'));
 const AdminPerfil = lazy(() => import('./pages/admin/AdminPerfil'));
 const AdminRelatorios = lazy(() => import('./pages/admin/AdminRelatorios'));
 const Contato = lazy(() => import('./pages/Contato'));
+const Privacidade = lazy(() => import('./pages/Privacidade'));
+const Termos = lazy(() => import('./pages/Termos'));
 
 // Rotas do mapa do site definido no Trabalho Final (Atividade Extensionista II).
 export default function App() {
@@ -82,6 +84,8 @@ export default function App() {
                 </Route>
 
                 <Route path="contato" element={<Contato />} />
+                <Route path="privacidade" element={<Privacidade />} />
+                <Route path="termos" element={<Termos />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>

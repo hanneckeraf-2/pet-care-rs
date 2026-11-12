@@ -61,7 +61,9 @@ export default function Footer() {
         </div>
       </div>
       <div className="border-t border-gray-800 py-4 text-center text-xs text-gray-500">
-        © {new Date().getFullYear()} Pet Care RS · Projeto de Atividade Extensionista UNINTER
+        © {new Date().getFullYear()} Pet Care RS · Projeto de Atividade Extensionista UNINTER ·{' '}
+        <Link to="/privacidade" className="hover:text-white underline">Política de Privacidade</Link> ·{' '}
+        <Link to="/termos" className="hover:text-white underline">Termos de Uso</Link>
       </div>
     </footer>
   );
