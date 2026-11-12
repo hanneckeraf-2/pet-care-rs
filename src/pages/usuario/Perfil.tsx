@@ -3,12 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { HandHeart, Heart, Settings } from 'lucide-react';
+import { AlertTriangle, HandHeart, Heart, MessageCircle, PawPrint, Plus, Settings } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
 import { CIDADES } from '../../lib/constants';
-import { STATUS_ADOCAO, STATUS_INSCRICAO, formatarData } from '../../lib/labels';
-import { TIPO_SOLICITACAO } from '../../lib/animais';
+import { STATUS_ADOCAO, STATUS_ANIMAL, STATUS_INSCRICAO, formatarData } from '../../lib/labels';
+import { TIPO_SOLICITACAO, fotoPrincipal } from '../../lib/animais';
 import { useAuth } from '../../contexts/AuthContext';
 import { Alert, Button, Card, Field, Input, Select } from '../../components/ui';
 import Badge from '../../components/Badge';
@@ -34,6 +34,15 @@ type Adocao = {
   tipo: Enums<'tipo_solicitacao'>;
   animal: { id: number; nome: string } | null;
 };
+type Registro = {
+  id: number;
+  nome: string;
+  status: Enums<'status_animal'>;
+  cidade: string;
+  criado_em: string;
+  foto: { url: string; ordem: number }[];
+  mensagem_animal: { count: number }[];
+};
 type Inscricao = {
   id: number;
   status: Enums<'status_inscricao'>;
@@ -48,6 +57,7 @@ export default function Perfil() {
   const [erro, setErro] = useState<string | null>(null);
   const [adocoes, setAdocoes] = useState<Adocao[]>([]);
   const [inscricoes, setInscricoes] = useState<Inscricao[]>([]);
+  const [registros, setRegistros] = useState<Registro[]>([]);
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting, isDirty } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -67,7 +77,7 @@ export default function Perfil() {
 
   const carregarHistorico = useCallback(async () => {
     if (!user) return;
-    const [ad, ins] = await Promise.all([
+    const [ad, ins, reg] = await Promise.all([
       supabase
         .from('adocao')
         .select('id, status, criado_em, tipo, animal(id, nome)')
@@ -78,8 +88,17 @@ export default function Perfil() {
         .select('id, status, criado_em, vaga_voluntariado(titulo, organizacao(nome))')
         .eq('id_usuario', user.id)
         .order('criado_em', { ascending: false }),
+      // animais que o próprio usuário registrou como perdidos/encontrados
+      supabase
+        .from('animal')
+        .select('id, nome, status, cidade, criado_em, foto(url, ordem), mensagem_animal(count)')
+        .eq('id_usuario', user.id)
+        .is('id_organizacao', null)
+        .order('criado_em', { ascending: false }),
     ]);
-    if (ad.error || ins.error) setErro(traduzirErro(ad.error ?? ins.error));
+    const falha = ad.error ?? ins.error ?? reg.error;
+    if (falha) setErro(traduzirErro(falha));
+    setRegistros((reg.data as Registro[] | null) ?? []);
     setAdocoes((ad.data as Adocao[] | null) ?? []);
     setInscricoes((ins.data as Inscricao[] | null) ?? []);
   }, [user]);
@@ -199,6 +218,58 @@ export default function Perfil() {
                 </div>
               </li>
             ))}
+          </ul>
+        )}
+      </Card>
+
+      <Card className="mb-8">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <AlertTriangle className="text-orange-500" size={20} aria-hidden="true" /> Meus animais registrados
+          </h2>
+          {registros.length > 0 && (
+            <Link to="/desaparecidos/novo" className="inline-flex items-center gap-1 text-sm text-purple-700 font-semibold hover:underline">
+              <Plus size={16} aria-hidden="true" /> Registrar animal
+            </Link>
+          )}
+        </div>
+        {registros.length === 0 ? (
+          <p className="text-gray-600">
+            Você não registrou nenhum animal perdido ou encontrado.{' '}
+            <Link to="/desaparecidos/novo" className="text-purple-700 font-semibold hover:underline">Registrar animal</Link>
+          </p>
+        ) : (
+          <ul className="divide-y divide-gray-100">
+            {registros.map((r) => {
+              const foto = fotoPrincipal(r.foto);
+              const mensagens = r.mensagem_animal[0]?.count ?? 0;
+              return (
+                <li key={r.id}>
+                  <Link to={`/desaparecidos/${r.id}`} className="py-3 flex items-center gap-4 hover:bg-gray-50 -mx-2 px-2 rounded-md">
+                    <div className="w-14 h-14 rounded-md overflow-hidden bg-gray-100 shrink-0">
+                      {foto ? (
+                        <img src={foto} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <PawPrint className="w-full h-full p-3 text-gray-300" aria-hidden="true" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold truncate">{r.nome}</p>
+                      <p className="text-sm text-gray-500">
+                        {r.cidade} · registrado em {formatarData(r.criado_em)}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <Badge {...STATUS_ANIMAL[r.status]} />
+                      <span className={`text-xs flex items-center gap-1 ${mensagens > 0 ? 'text-purple-700 font-semibold' : 'text-gray-500'}`}>
+                        <MessageCircle size={12} aria-hidden="true" />
+                        {mensagens === 0 ? 'Nenhuma mensagem' : mensagens === 1 ? '1 mensagem' : `${mensagens} mensagens`}
+                      </span>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         )}
       </Card>
