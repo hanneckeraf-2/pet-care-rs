@@ -1,0 +1,39 @@
+name: Keep-alive do Supabase
+
+# Projetos do plano gratuito do Supabase são pausados após 7 dias sem atividade.
+# Esta rotina faz uma consulta leve à API a cada 3 dias para manter o banco ativo.
+#
+# Secrets necessários (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL       https://<project-ref>.supabase.co
+#   SUPABASE_ANON_KEY  chave pública (publishable/anon), a mesma do site
+
+on:
+  schedule:
+    - cron: '0 12 */3 * *' # 12h UTC (9h em Brasília), a cada 3 dias
+  workflow_dispatch: # permite rodar manualmente pela aba Actions
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    name: Consulta leve ao banco
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar a API do Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::Configure os secrets SUPABASE_URL e SUPABASE_ANON_KEY no repositório."
+            exit 1
+          fi
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            "$SUPABASE_URL/rest/v1/organizacao?select=id&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY")
+          echo "Resposta da API: $status"
+          if [ "$status" != "200" ]; then
+            echo "::error::O Supabase respondeu $status. O projeto pode estar pausado: reative em supabase.com/dashboard."
+            exit 1
+          fi
