@@ -4,6 +4,7 @@ import Header from './Header';
 import Footer from './Footer';
 import AvisoOffline from './AvisoOffline';
 import AtualizacaoPWA from './AtualizacaoPWA';
+import { Analytics } from '@vercel/analytics/react';
 
 export default function Layout() {
   const { pathname } = useLocation();
@@ -27,6 +28,8 @@ export default function Layout() {
       </main>
       <Footer />
       <AtualizacaoPWA />
+      {/* estatísticas de acesso anônimas, sem cookies (Vercel Web Analytics) */}
+      <Analytics />
     </div>
   );
 }

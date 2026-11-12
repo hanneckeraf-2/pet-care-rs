@@ -28,6 +28,9 @@ Os testes e a implantação acontecem em **São Leopoldo/RS**, com duas iniciati
 | **Notificações** | Avisos em tempo real (sino no cabeçalho) e por e-mail sobre adoções, inscrições, mensagens e novos animais na cidade | Todos |
 | **Conta** | Cadastro por e-mail/senha ou Google, recuperação de senha, perfil, histórico, exclusão de conta | Todos |
 | **Contato** | Formulário com proteção contra spam e perguntas frequentes | Todos |
+| **Compartilhar** | Botão de compartilhar (WhatsApp, redes, copiar link) em animais, desaparecidos e organizações, com pré-visualização do link | Todos |
+| **Privacidade (LGPD)** | Política de Privacidade, Termos de Uso e aceite no cadastro | Todos |
+| **Administração do sistema** | Criar organizações, vincular administradores e ler as mensagens do formulário de Contato | Admin do sistema |
 | **App (PWA)** | Instalável no celular e no computador ("Instalar app" no rodapé), funciona com conexão instável, avisa quando há nova versão | Todos |
 
 ## Tecnologias
@@ -96,7 +99,13 @@ O site é publicado na [Vercel](https://vercel.com), e cada push no `main` gera 
 3. No Supabase, em **Authentication > URL Configuration**:
    - troque a **Site URL** pela URL da Vercel;
    - adicione `https://<seu-app>.vercel.app/**` às **Redirect URLs**, mantendo a de `localhost`.
-4. **Dados de produção:** o `seed.sql` serve só para desenvolvimento. No banco de produção, rode uma vez no SQL Editor o script `supabase/producao/parceiros.sql`. Ele remove as organizações fictícias e cadastra as parceiras reais, e no final traz um modelo para vincular o responsável de cada uma como administrador.
+4. **Estatísticas de acesso:** no projeto da Vercel, abra **Analytics → Enable**. O componente `<Analytics />` já está no site. As estatísticas são anônimas e não usam cookies.
+5. **Keep-alive do Supabase:** projetos gratuitos são pausados após 7 dias sem uso. O workflow `.github/workflows/keep-alive.yml` faz uma consulta leve a cada 3 dias. Para ativar:
+   1. No GitHub, vá em **Settings → Secrets and variables → Actions → New repository secret** e crie `SUPABASE_URL` e `SUPABASE_ANON_KEY` (os mesmos valores do `.env.local`).
+   2. Em **Actions → Keep-alive do Supabase → Run workflow**, rode uma vez para testar.
+
+   Observação: o GitHub desativa workflows agendados de repositórios públicos que ficam 60 dias sem commits. Se isso acontecer, reative na aba Actions.
+6. **Dados de produção:** o `seed.sql` serve só para desenvolvimento. No banco de produção, rode uma vez no SQL Editor o script `supabase/producao/parceiros.sql`. Ele remove as organizações fictícias e cadastra as parceiras reais, e no final traz um modelo para vincular o responsável de cada uma como administrador.
 
 ## Notificações por e-mail (Brevo)
 As notificações do site também são enviadas por e-mail, se o usuário mantiver a opção ligada no perfil. O envio passa pela Edge Function `supabase/functions/enviar-email-notificacao`, acionada a cada nova notificação. O provedor é o [Brevo](https://www.brevo.com), com plano gratuito de 300 e-mails por dia.
