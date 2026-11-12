@@ -32,7 +32,7 @@ type FormData = z.infer<typeof schema>;
 const FAQ = [
   {
     pergunta: 'Como funciona a adoção?',
-    resposta: 'Escolha um animal, clique em "Solicitar Adoção" e preencha o formulário. A organização responsável analisa e entra em contato com você.',
+    resposta: 'Escolha um animal, clique em "Quero Adotar" e preencha o formulário. Algumas organizações usam formulário próprio; nesse caso, o site mostra o link. A organização responsável analisa e entra em contato com você.',
   },
   {
     pergunta: 'O site recebe as doações?',

@@ -96,7 +96,7 @@ export default function SolicitarAdocao({ tipo, animalId, animalNome, onEnviado,
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
       <h2 className="text-xl font-semibold">
-        {lt ? `Quero ser lar temporário de ${animalNome}` : `Solicitar adoção de ${animalNome}`}
+        {lt ? `Quero ser lar temporário de ${animalNome}` : `Quero adotar ${animalNome}`}
       </h2>
       <p className="text-sm text-gray-600">
         {lt

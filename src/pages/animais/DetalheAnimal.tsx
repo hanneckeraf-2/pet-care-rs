@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import type { QueryData } from '@supabase/supabase-js';
-import { ArrowLeft, Building2, Calendar, CheckCircle2, Heart, Home, Mail, MapPin, MessageCircle, PartyPopper, PawPrint, Pencil, Phone, Ruler, Tag } from 'lucide-react';
+import { ArrowLeft, Building2, Calendar, CheckCircle2, Heart, Home, Mail, MapPin, MessageCircle, PartyPopper, PawPrint, Pencil, Phone, Ruler, Tag, ClipboardList, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
 import { ESPECIE_LABEL, PORTE_LABEL, SEXO_LABEL, STATUS_ADOTAVEIS, formatarIdade } from '../../lib/animais';
@@ -12,20 +12,21 @@ import Badge from '../../components/Badge';
 import Spinner from '../../components/Spinner';
 import NotFound from '../NotFound';
 import SolicitarAdocao from './SolicitarAdocao';
+import { lerContatos } from '../../lib/organizacoes';
 import PerguntaAnimal from './PerguntaAnimal';
 import type { Enums } from '../../types/database';
 
 const detalheQuery = (id: number) =>
   supabase
     .from('animal')
-    .select('*, organizacao(id, nome, cidade, telefone, email), foto(id, url, ordem, descricao)')
+    .select('*, organizacao(id, nome, cidade, telefone, email, contatos), foto(id, url, ordem, descricao)')
     .eq('id', id)
     .order('ordem', { referencedTable: 'foto' })
     .maybeSingle();
 type AnimalDetalhe = NonNullable<QueryData<ReturnType<typeof detalheQuery>>>;
 
 type MinhaSolicitacao = { id: number; status: Enums<'status_adocao'>; criado_em: string; tipo: Enums<'tipo_solicitacao'> };
-type Acao = Enums<'tipo_solicitacao'> | 'pergunta';
+type Acao = Enums<'tipo_solicitacao'> | 'pergunta' | 'formulario_externo';
 
 export default function DetalheAnimal() {
   const { id } = useParams();
@@ -41,7 +42,7 @@ export default function DetalheAnimal() {
   // última solicitação do usuário para este animal, por tipo (adoção / lar temporário)
   const [solicitacoes, setSolicitacoes] = useState<Partial<Record<Enums<'tipo_solicitacao'>, MinhaSolicitacao>>>({});
   const [formAberto, setFormAberto] = useState<Acao | null>(null);
-  const [enviado, setEnviado] = useState<Acao | null>(null);
+  const [enviado, setEnviado] = useState<Exclude<Acao, 'formulario_externo'> | null>(null);
 
   useEffect(() => {
     if (!Number.isInteger(animalId)) {
@@ -84,13 +85,15 @@ export default function DetalheAnimal() {
   const fotos = animal.foto;
   const disponivelParaAdocao = !!animal.organizacao && STATUS_ADOTAVEIS.includes(animal.status);
   const aceitaLarTemporario = disponivelParaAdocao && animal.aceita_lar_temporario;
+  const formularioAdocao = animal.organizacao ? lerContatos(animal.organizacao.contatos).formularioAdocao : undefined;
   const gerencia =
     animal.id_organizacao !== null &&
     (perfil?.tipo_usuario === 'admin_sistema' ||
       (perfil?.tipo_usuario === 'admin_org' && perfil.id_organizacao === animal.id_organizacao));
 
   function abrir(acao: Acao) {
-    if (!user) {
+    // o formulário próprio da organização é externo: não exige conta no site
+    if (!user && acao !== 'formulario_externo') {
       navigate('/entrar', { state: { from: location.pathname } });
       return;
     }
@@ -99,14 +102,14 @@ export default function DetalheAnimal() {
     setTimeout(() => document.getElementById('form-acao')?.scrollIntoView({ behavior: 'smooth' }), 50);
   }
 
-  function aoEnviar(acao: Acao) {
+  function aoEnviar(acao: Exclude<Acao, 'formulario_externo'>) {
     setEnviado(acao);
     setFormAberto(null);
     carregarSolicitacao();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  const textoEnviado: Record<Acao, string> = {
+  const textoEnviado: Record<Exclude<Acao, 'formulario_externo'>, string> = {
     adocao: 'Solicitação de adoção enviada! Ela está em análise pela organização.',
     lar_temporario: 'Pedido de lar temporário enviado! A organização vai analisar e entrar em contato.',
     pergunta: 'Pergunta enviada! A organização vai responder pelo contato que você informou.',
@@ -126,7 +129,10 @@ export default function DetalheAnimal() {
     }
     return (
       <div>
-        <Button onClick={() => abrir(tipo)} className={`w-full sm:w-auto !px-6 !py-3 ${classe}`}>
+        <Button
+          onClick={() => abrir(tipo === 'adocao' && formularioAdocao ? 'formulario_externo' : tipo)}
+          className={`w-full sm:w-auto !px-6 !py-3 ${classe}`}
+        >
           {icone} {rotulo}
         </Button>
         {atual && (
@@ -267,7 +273,7 @@ export default function DetalheAnimal() {
 
           {disponivelParaAdocao ? (
             <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
-              {acaoSolicitacao('adocao', 'Solicitar Adoção', <Heart size={20} aria-hidden="true" />, 'text-lg')}
+              {acaoSolicitacao('adocao', 'Quero Adotar', <Heart size={20} aria-hidden="true" />, 'text-lg')}
               {aceitaLarTemporario &&
                 acaoSolicitacao('lar_temporario', 'Quero ser Lar Temporário', <Home size={20} aria-hidden="true" />, '!bg-teal-600 hover:!bg-teal-700')}
               <div>
@@ -297,7 +303,28 @@ export default function DetalheAnimal() {
       {formAberto && (
         <div id="form-acao" className="max-w-3xl mx-auto mt-12">
           <Card>
-            {formAberto === 'pergunta' ? (
+            {formAberto === 'formulario_externo' && formularioAdocao ? (
+              <div className="text-center py-4">
+                <ClipboardList className="w-12 h-12 text-purple-600 mx-auto mb-4" aria-hidden="true" />
+                <h2 className="text-xl font-semibold mb-2">Quero adotar {animal.nome}</h2>
+                <p className="text-gray-700 max-w-xl mx-auto mb-6">
+                  A <strong>{animal.organizacao?.nome}</strong> faz a adoção pelo próprio formulário. Clique no botão abaixo para
+                  preenchê-lo e informe que tem interesse em <strong>{animal.nome}</strong>.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <a
+                    href={formularioAdocao}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-purple-700 transition"
+                  >
+                    <ExternalLink size={18} aria-hidden="true" /> Abrir formulário de adoção
+                  </a>
+                  <Button variant="secondary" onClick={() => setFormAberto(null)}>Voltar</Button>
+                </div>
+                <p className="text-xs text-gray-500 mt-4">O formulário abre em uma nova aba, no site da organização.</p>
+              </div>
+            ) : formAberto === 'pergunta' ? (
               <PerguntaAnimal
                 animalId={animal.id}
                 animalNome={animal.nome}
@@ -308,11 +335,11 @@ export default function DetalheAnimal() {
             ) : (
               <SolicitarAdocao
                 key={formAberto}
-                tipo={formAberto}
+                tipo={formAberto === 'lar_temporario' ? 'lar_temporario' : 'adocao'}
                 animalId={animal.id}
                 animalNome={animal.nome}
                 onCancelar={() => setFormAberto(null)}
-                onEnviado={() => aoEnviar(formAberto)}
+                onEnviado={() => aoEnviar(formAberto === 'lar_temporario' ? 'lar_temporario' : 'adocao')}
               />
             )}
           </Card>

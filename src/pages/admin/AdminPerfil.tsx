@@ -32,6 +32,7 @@ const schema = z.object({
   instagram: urlOpcional,
   facebook: urlOpcional,
   site: urlOpcional,
+  formulario_adocao: urlOpcional,
   pix_doacao: z.string().trim().max(140),
   necessidades: z.string().trim().max(2000),
 });
@@ -44,7 +45,7 @@ export default function AdminPerfil() {
   const [enviandoFoto, setEnviandoFoto] = useState(false);
   const inputFoto = useRef<HTMLInputElement>(null);
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting, isDirty } } = useForm<FormData>({
+  const { register, handleSubmit, reset, watch, formState: { errors, isSubmitting, isDirty } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
@@ -62,6 +63,7 @@ export default function AdminPerfil() {
       instagram: c.instagram ?? '',
       facebook: c.facebook ?? '',
       site: c.site ?? '',
+      formulario_adocao: c.formularioAdocao ?? '',
       pix_doacao: org.pix_doacao ?? '',
       necessidades: org.necessidades ?? '',
     });
@@ -76,6 +78,7 @@ export default function AdminPerfil() {
     if (d.instagram) contatos.instagram = d.instagram;
     if (d.facebook) contatos.facebook = d.facebook;
     if (d.site) contatos.site = d.site;
+    if (d.formulario_adocao) contatos.formulario_adocao = d.formulario_adocao;
 
     const { error } = await supabase
       .from('organizacao')
@@ -203,6 +206,25 @@ export default function AdminPerfil() {
         <Card>
           <h3 className="font-semibold mb-3">Doações e necessidades</h3>
           <div className="space-y-4">
+            <Field
+              id="formulario-adocao"
+              label="Formulário de adoção (link, opcional)"
+              hint="Se preenchido, o botão Quero Adotar leva a pessoa para este formulário em vez do formulário do site. No Google Forms, use Enviar → ícone de link (endereço .../viewform)."
+              error={errors.formulario_adocao?.message}
+            >
+              <Input
+                id="formulario-adocao"
+                placeholder="https://docs.google.com/forms/d/e/.../viewform"
+                invalid={!!errors.formulario_adocao}
+                {...register('formulario_adocao')}
+              />
+            </Field>
+            {/\/edit(\?.*)?$/.test(watch('formulario_adocao') ?? '') && (
+              <p className="-mt-2 text-sm text-amber-700" role="alert">
+                Este parece ser o link de <strong>edição</strong> do formulário, que o público não consegue abrir. No Google Forms, clique em
+                Enviar → ícone de link e copie o endereço que termina em /viewform.
+              </p>
+            )}
             <Field id="pix" label="Chave Pix para doações" hint="Aparece no botão Quero Doar da página pública.">
               <Input id="pix" {...register('pix_doacao')} />
             </Field>
