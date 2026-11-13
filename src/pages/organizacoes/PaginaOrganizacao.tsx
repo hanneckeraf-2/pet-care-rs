@@ -74,12 +74,19 @@ export default function PaginaOrganizacao() {
   const linksContato = [
     org.telefone && { href: `tel:${org.telefone.replace(/[^\d+]/g, '')}`, label: org.telefone, icon: Phone },
     org.email && { href: `mailto:${org.email}`, label: org.email, icon: Mail },
-    contatos.whatsapp && { href: `https://wa.me/${contatos.whatsapp}`, label: 'WhatsApp', icon: MessageCircle },
-    contatos.whatsappGrupo && { href: contatos.whatsappGrupo, label: 'Grupo no WhatsApp', icon: Users },
-    contatos.instagram && { href: contatos.instagram, label: 'Instagram', icon: Instagram },
+    contatos.whatsapp && { href: `https://wa.me/${contatos.whatsapp}`, label: 'WhatsApp', icon: MessageCircle, canal: 'whatsapp' },
+    contatos.whatsappGrupo && { href: contatos.whatsappGrupo, label: 'Grupo no WhatsApp', icon: Users, canal: 'whatsapp' },
+    contatos.instagram && { href: contatos.instagram, label: 'Instagram', icon: Instagram, canal: 'instagram' },
     contatos.facebook && { href: contatos.facebook, label: 'Facebook', icon: Facebook },
     contatos.site && { href: contatos.site, label: 'Site', icon: Globe },
-  ].filter(Boolean) as { href: string; label: string; icon: typeof Phone }[];
+  ]
+    .filter(Boolean)
+    .map((l) => {
+      const link = l as { href: string; label: string; icon: typeof Phone; canal?: string };
+      return { ...link, preferencial: !!link.canal && link.canal === contatos.contatoPreferencial };
+    })
+    // o canal preferencial da organização aparece primeiro
+    .sort((a, b) => Number(b.preferencial) - Number(a.preferencial));
 
   return (
     <div>
@@ -155,7 +162,7 @@ export default function PaginaOrganizacao() {
               <Card className="!p-5">
                 <h2 className="font-semibold text-lg mb-3">Contato</h2>
                 <ul className="space-y-2">
-                  {linksContato.map(({ href, label, icon: Icon }) => (
+                  {linksContato.map(({ href, label, icon: Icon, preferencial }) => (
                     <li key={href}>
                       <a
                         href={href}
@@ -164,6 +171,11 @@ export default function PaginaOrganizacao() {
                         className="flex items-center gap-2 text-gray-700 hover:text-purple-700"
                       >
                         <Icon size={16} className="text-purple-600" aria-hidden="true" /> {label}
+                        {preferencial && (
+                          <span className="text-[11px] font-semibold uppercase tracking-wide bg-purple-100 text-purple-700 rounded-full px-2 py-0.5">
+                            Preferencial
+                          </span>
+                        )}
                       </a>
                     </li>
                   ))}

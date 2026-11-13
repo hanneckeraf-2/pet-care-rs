@@ -35,6 +35,15 @@ const schema = z.object({
   formulario_adocao: urlOpcional,
   pix_doacao: z.string().trim().max(140),
   necessidades: z.string().trim().max(2000),
+  contato_preferencial: z.enum(['', 'whatsapp', 'instagram']),
+}).superRefine((d, ctx) => {
+  // o canal preferencial precisa estar preenchido
+  if (d.contato_preferencial === 'whatsapp' && !d.whatsapp.replace(/\D/g, '') && !d.whatsapp_grupo) {
+    ctx.addIssue({ code: 'custom', path: ['contato_preferencial'], message: 'Preencha o WhatsApp ou o grupo do WhatsApp para usá-lo como preferencial.' });
+  }
+  if (d.contato_preferencial === 'instagram' && !d.instagram) {
+    ctx.addIssue({ code: 'custom', path: ['contato_preferencial'], message: 'Preencha o link do Instagram para usá-lo como preferencial.' });
+  }
 });
 type FormData = z.infer<typeof schema>;
 
@@ -66,6 +75,7 @@ export default function AdminPerfil() {
       formulario_adocao: c.formularioAdocao ?? '',
       pix_doacao: org.pix_doacao ?? '',
       necessidades: org.necessidades ?? '',
+      contato_preferencial: c.contatoPreferencial ?? '',
     });
   }, [org, reset]);
 
@@ -79,6 +89,7 @@ export default function AdminPerfil() {
     if (d.facebook) contatos.facebook = d.facebook;
     if (d.site) contatos.site = d.site;
     if (d.formulario_adocao) contatos.formulario_adocao = d.formulario_adocao;
+    if (d.contato_preferencial) contatos.contato_preferencial = d.contato_preferencial;
 
     const { error } = await supabase
       .from('organizacao')
@@ -200,6 +211,20 @@ export default function AdminPerfil() {
             <Field id="site" label="Site (link)" error={errors.site?.message}>
               <Input id="site" placeholder="https://..." invalid={!!errors.site} {...register('site')} />
             </Field>
+            <div className="sm:col-span-2 rounded-md border border-purple-100 bg-purple-50 p-4">
+              <Field
+                id="contato-preferencial"
+                label="Contato preferencial para adoção e dúvidas"
+                hint="Os botões Quero Adotar e Quero Mais Informações vão levar a pessoa direto para este canal, com uma mensagem sugerida sobre o animal. Se houver formulário de adoção cadastrado, ele continua tendo prioridade no Quero Adotar."
+                error={errors.contato_preferencial?.message}
+              >
+                <Select id="contato-preferencial" invalid={!!errors.contato_preferencial} {...register('contato_preferencial')}>
+                  <option value="">Formulários do próprio site</option>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="instagram">Instagram (mensagem no Direct)</option>
+                </Select>
+              </Field>
+            </div>
           </div>
         </Card>
 
