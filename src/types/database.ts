@@ -6,6 +6,9 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 type Timestamps = { criado_em: string; atualizado_em: string };
 
+/** Fotos de identificação: perfil do usuário; logo e capa da organização */
+export type TipoFotoIdentificacao = 'perfil' | 'logo' | 'capa';
+
 export type Database = {
   public: {
     Tables: {
@@ -22,6 +25,7 @@ export type Database = {
           pix_doacao: string | null;
           necessidades: string | null;
           foto_url: string | null;
+          logo_url: string | null;
         } & Timestamps;
         Insert: {
           nome: string;
@@ -34,6 +38,7 @@ export type Database = {
           pix_doacao?: string | null;
           necessidades?: string | null;
           foto_url?: string | null;
+          logo_url?: string | null;
         };
         Update: Partial<Database['public']['Tables']['organizacao']['Insert']>;
         Relationships: [];
@@ -120,6 +125,7 @@ export type Database = {
           storage_path: string | null;
           descricao: string | null;
           ordem: number;
+          tipo: TipoFotoIdentificacao | null;
           criado_em: string;
         };
         Insert: {
@@ -130,6 +136,7 @@ export type Database = {
           storage_path?: string | null;
           descricao?: string | null;
           ordem?: number;
+          tipo?: TipoFotoIdentificacao | null;
         };
         Update: Partial<Database['public']['Tables']['foto']['Insert']>;
         Relationships: [

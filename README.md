@@ -22,11 +22,11 @@ Os testes e a implantação acontecem em **São Leopoldo/RS**, com duas iniciati
 |---|---|---|
 | **Adoção** | Busca com filtros (espécie, idade, cidade, organização, porte, sexo, texto), página do animal com galeria e formulário de solicitação de adoção | Maria |
 | **Voluntariado** | Vagas filtráveis por disponibilidade, atividade e cidade; inscrição com "Quero Ajudar" | Carlos |
-| **Painel da organização** | Cadastro e edição de animais com fotos, aprovação de adoções e de voluntários, perfil público (Pix, necessidades, redes sociais) e relatórios | Ana |
+| **Painel da organização** | Cadastro e edição de animais com fotos, aprovação de adoções e de voluntários, perfil público (logo, capa, Pix, necessidades, redes sociais) e relatórios | Ana |
 | **Desaparecidos** | Registro de animal perdido ou encontrado com fotos, busca, mensagens para o tutor, marcar como "voltou para casa" | Fernanda |
 | **Organizações** | Lista e página pública de cada organização, com doação via Pix (sem intermediação do site) | Doadores |
 | **Notificações** | Avisos em tempo real (sino no cabeçalho) e por e-mail sobre adoções, inscrições, mensagens e novos animais na cidade | Todos |
-| **Conta** | Cadastro por e-mail/senha ou Google, recuperação de senha, perfil, histórico, exclusão de conta | Todos |
+| **Conta** | Cadastro por e-mail/senha ou Google, recuperação de senha, perfil com foto, histórico, exclusão de conta | Todos |
 | **Contato** | Formulário com proteção contra spam e perguntas frequentes | Todos |
 | **Compartilhar** | Botão de compartilhar (WhatsApp, redes, copiar link) em animais, desaparecidos e organizações, com pré-visualização do link | Todos |
 | **Privacidade (LGPD)** | Política de Privacidade, Termos de Uso e aceite no cadastro | Todos |
@@ -181,7 +181,7 @@ Baseado no Diagrama ER do Trabalho Final da etapa 2, com estes ajustes:
 | `Autenticacao` | `auth.users` do Supabase | Provedores e senhas ficam com o Supabase Auth (hash, recuperação, OAuth) |
 | `Usuario` | `usuario` | Perfil ligado a `auth.users`, criado automaticamente por trigger |
 | `Voluntariado` | `vaga_voluntariado` + `inscricao_voluntariado` | A vaga (aberta pela ONG) e a candidatura (do voluntário) são entidades diferentes |
-| `Foto` | `foto` | Pode pertencer a um animal, a um usuário ou a uma organização; os arquivos ficam no bucket `fotos` |
+| `Foto` | `foto` | Pode pertencer a um animal, a um usuário (foto de perfil) ou a uma organização (logo e capa), indicado em `tipo`; os arquivos ficam no bucket `fotos` e um trigger copia a URL para `usuario.foto_url`, `organizacao.logo_url` e `organizacao.foto_url` |
 | `Adocao` | `adocao` | Ganhou `dados_formulario` (respostas do adotante) e status em enum |
 | (novo) | `notificacao` | Notificações geradas por triggers |
 | (novo) | `mensagem_animal` | Mensagens "Entrar em Contato" sobre animais desaparecidos |

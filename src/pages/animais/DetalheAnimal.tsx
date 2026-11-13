@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import type { QueryData } from '@supabase/supabase-js';
-import { ArrowLeft, Building2, Calendar, CheckCircle2, Heart, Home, Mail, MapPin, MessageCircle, PartyPopper, PawPrint, Pencil, Phone, Ruler, Tag } from 'lucide-react';
+import { ArrowLeft, Calendar, CheckCircle2, Heart, Home, Mail, MapPin, MessageCircle, PartyPopper, PawPrint, Pencil, Phone, Ruler, Tag } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
 import { ESPECIE_LABEL, PORTE_LABEL, SEXO_LABEL, STATUS_ADOTAVEIS, formatarIdade } from '../../lib/animais';
@@ -17,11 +17,12 @@ import { lerContatos, linkContatoPreferencial } from '../../lib/organizacoes';
 import ContatoExterno from './ContatoExterno';
 import PerguntaAnimal from './PerguntaAnimal';
 import type { Enums } from '../../types/database';
+import LogoOrganizacao from '../../components/LogoOrganizacao';
 
 const detalheQuery = (id: number) =>
   supabase
     .from('animal')
-    .select('*, organizacao(id, nome, cidade, telefone, email, contatos), foto(id, url, ordem, descricao)')
+    .select('*, organizacao(id, nome, cidade, telefone, email, contatos, logo_url), foto(id, url, ordem, descricao)')
     .eq('id', id)
     .order('ordem', { referencedTable: 'foto' })
     .maybeSingle();
@@ -256,7 +257,7 @@ export default function DetalheAnimal() {
             <Card className="mb-6 !p-4">
               <h2 className="text-sm text-gray-500 uppercase tracking-wide mb-2">Organização responsável</h2>
               <Link to={`/organizacoes/${animal.organizacao.id}`} className="flex items-center gap-2 font-semibold text-lg hover:text-purple-700">
-                <Building2 size={20} className="text-purple-600" aria-hidden="true" />
+                <LogoOrganizacao url={animal.organizacao.logo_url} className="w-10 h-10" />
                 {animal.organizacao.nome}
               </Link>
               <div className="mt-2 space-y-1 text-sm text-gray-600">

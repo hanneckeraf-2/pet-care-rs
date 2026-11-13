@@ -10,6 +10,7 @@ import { Alert, Button, Textarea } from '../../components/ui';
 import Badge from '../../components/Badge';
 import Spinner from '../../components/Spinner';
 import { useAdmin } from './AdminLayout';
+import Avatar from '../../components/Avatar';
 
 type Solicitacao = {
   id: number;
@@ -19,7 +20,7 @@ type Solicitacao = {
   descricao: string | null;
   dados_formulario: Json;
   animal: { id: number; nome: string };
-  usuario: { nome: string; email: string; telefone: string | null; cidade: string | null } | null;
+  usuario: { nome: string; email: string; telefone: string | null; cidade: string | null; foto_url: string | null } | null;
 };
 
 const ABAS: { valor: Enums<'status_adocao'> | ''; label: string }[] = [
@@ -83,7 +84,7 @@ export default function AdminAdocoes() {
     setCarregando(true);
     let q = supabase
       .from('adocao')
-      .select('id, status, tipo, criado_em, descricao, dados_formulario, animal!inner(id, nome, id_organizacao), usuario(nome, email, telefone, cidade)')
+      .select('id, status, tipo, criado_em, descricao, dados_formulario, animal!inner(id, nome, id_organizacao), usuario(nome, email, telefone, cidade, foto_url)')
       .eq('animal.id_organizacao', org.id)
       .order('criado_em', { ascending: false });
     if (status) q = q.eq('status', status);
@@ -185,6 +186,8 @@ export default function AdminAdocoes() {
                   className="w-full p-4 flex flex-wrap items-center justify-between gap-3 text-left"
                   aria-expanded={expandida}
                 >
+                  <div className="flex items-center gap-3">
+                  <Avatar url={s.usuario?.foto_url} nome={s.usuario?.nome || s.usuario?.email} className="w-10 h-10 text-sm" />
                   <div>
                     <p className="font-semibold">
                       {s.usuario?.nome || s.usuario?.email || 'Usuário'}{' '}
@@ -192,6 +195,7 @@ export default function AdminAdocoes() {
                       {s.animal.nome}
                     </p>
                     <p className="text-sm text-gray-500">{formatarData(s.criado_em)}</p>
+                  </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge {...TIPO_SOLICITACAO[s.tipo]} />

@@ -13,6 +13,7 @@ import VagaCard from '../../components/VagaCard';
 import BotaoCompartilhar from '../../components/BotaoCompartilhar';
 import Spinner from '../../components/Spinner';
 import NotFound from '../NotFound';
+import LogoOrganizacao from '../../components/LogoOrganizacao';
 
 export default function PaginaOrganizacao() {
   const { id } = useParams();
@@ -100,7 +101,12 @@ export default function PaginaOrganizacao() {
               <ArrowLeft size={14} aria-hidden="true" /> Organizações
             </Link>
             <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
-              {!org.foto_url && <Building2 aria-hidden="true" />} {org.nome}
+              {org.logo_url ? (
+                <LogoOrganizacao url={org.logo_url} className="w-14 h-14 md:w-16 md:h-16" alt={`Logo de ${org.nome}`} />
+              ) : (
+                !org.foto_url && <Building2 aria-hidden="true" />
+              )}{' '}
+              {org.nome}
             </h1>
             <p className="flex items-center gap-1 text-white/90 mt-1">
               <MapPin size={16} aria-hidden="true" /> {[org.endereco, org.cidade].filter(Boolean).join(' · ')}

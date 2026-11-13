@@ -12,13 +12,14 @@ import { Alert, Button, Card, Field, Input, Select, Textarea } from '../../compo
 import Badge from '../../components/Badge';
 import Spinner from '../../components/Spinner';
 import { useAdmin } from './AdminLayout';
+import Avatar from '../../components/Avatar';
 
 type Inscricao = {
   id: number;
   status: Enums<'status_inscricao'>;
   mensagem: string | null;
   criado_em: string;
-  usuario: { nome: string; email: string; telefone: string | null } | null;
+  usuario: { nome: string; email: string; telefone: string | null; foto_url: string | null } | null;
 };
 type VagaAdmin = {
   id: number;
@@ -54,7 +55,7 @@ export default function AdminVoluntariado() {
   const carregar = useCallback(async () => {
     const { data, error } = await supabase
       .from('vaga_voluntariado')
-      .select('id, titulo, atividade, descricao, disponibilidade, status, inscricao_voluntariado(id, status, mensagem, criado_em, usuario(nome, email, telefone))')
+      .select('id, titulo, atividade, descricao, disponibilidade, status, inscricao_voluntariado(id, status, mensagem, criado_em, usuario(nome, email, telefone, foto_url))')
       .eq('id_organizacao', org.id)
       .order('status')
       .order('criado_em', { ascending: false })
@@ -191,13 +192,16 @@ export default function AdminVoluntariado() {
                     <ul className="divide-y divide-gray-100">
                       {ativas.map((i) => (
                         <li key={i.id} className="py-3 flex flex-wrap items-start justify-between gap-3">
-                          <div className="text-sm">
+                          <div className="text-sm flex items-start gap-3">
+                            <Avatar url={i.usuario?.foto_url} nome={i.usuario?.nome || i.usuario?.email} className="w-9 h-9 text-xs" />
+                            <div>
                             <p className="font-semibold">{i.usuario?.nome || i.usuario?.email || 'Usuário'} <span className="font-normal text-gray-500">· {formatarData(i.criado_em)}</span></p>
                             <div className="flex flex-wrap gap-3 text-purple-700">
                               {i.usuario?.email && <a href={`mailto:${i.usuario.email}`} className="flex items-center gap-1 hover:underline"><Mail size={12} aria-hidden="true" /> {i.usuario.email}</a>}
                               {i.usuario?.telefone && <a href={`tel:${i.usuario.telefone}`} className="flex items-center gap-1 hover:underline"><Phone size={12} aria-hidden="true" /> {i.usuario.telefone}</a>}
                             </div>
                             {i.mensagem && <p className="text-gray-700 mt-1 whitespace-pre-line">{i.mensagem}</p>}
+                            </div>
                           </div>
                           {i.status === 'pendente' ? (
                             <div className="flex gap-2">

@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Building2, ImagePlus } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { traduzirErro } from '../../lib/erros';
 import { CIDADES } from '../../lib/constants';
 import { REGEX_GRUPO_WHATSAPP, lerContatos } from '../../lib/organizacoes';
-import { TIPOS_IMAGEM, validarImagem } from '../../lib/upload';
+import { definirFotoIdentificacao, removerFotoIdentificacao, type DonoFotoIdentificacao } from '../../lib/upload';
+import EditorFotoIdentificacao from '../../components/EditorFotoIdentificacao';
 import { useAuth } from '../../contexts/AuthContext';
 import { Alert, Button, Card, Field, Input, Select, Textarea } from '../../components/ui';
 import { useAdmin } from './AdminLayout';
@@ -51,8 +52,6 @@ export default function AdminPerfil() {
   const { org, recarregarOrg } = useAdmin();
   const { user } = useAuth();
   const [mensagem, setMensagem] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
-  const [enviandoFoto, setEnviandoFoto] = useState(false);
-  const inputFoto = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, reset, watch, formState: { errors, isSubmitting, isDirty } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -110,26 +109,16 @@ export default function AdminPerfil() {
     setMensagem({ type: 'success', text: 'Perfil da organização atualizado.' });
   }
 
-  async function trocarFoto(arquivo: File | undefined) {
-    if (!arquivo || !user) return;
-    const problema = validarImagem(arquivo);
-    if (problema) return setMensagem({ type: 'error', text: problema });
-    setEnviandoFoto(true);
-    setMensagem(null);
-    const ext = arquivo.type.split('/')[1].replace('jpeg', 'jpg');
-    const caminho = `${user.id}/organizacao/${org.id}/${crypto.randomUUID()}.${ext}`;
-    const { error: erroUpload } = await supabase.storage.from('fotos').upload(caminho, arquivo, { contentType: arquivo.type });
-    if (erroUpload) {
-      setEnviandoFoto(false);
-      return setMensagem({ type: 'error', text: traduzirErro(erroUpload) });
-    }
-    const url = supabase.storage.from('fotos').getPublicUrl(caminho).data.publicUrl;
-    const { error } = await supabase.from('organizacao').update({ foto_url: url }).eq('id', org.id);
-    setEnviandoFoto(false);
-    if (inputFoto.current) inputFoto.current.value = '';
-    if (error) return setMensagem({ type: 'error', text: traduzirErro(error) });
+  async function trocarImagem(tipo: 'logo' | 'capa', arquivo: File) {
+    if (!user) return;
+    const dono: DonoFotoIdentificacao = { tipo, idOrganizacao: org.id };
+    await definirFotoIdentificacao(user.id, dono, arquivo);
     await recarregarOrg();
-    setMensagem({ type: 'success', text: 'Foto atualizada.' });
+  }
+
+  async function removerImagem(tipo: 'logo' | 'capa') {
+    await removerFotoIdentificacao({ tipo, idOrganizacao: org.id });
+    await recarregarOrg();
   }
 
   return (
@@ -137,23 +126,46 @@ export default function AdminPerfil() {
       <h2 className="text-xl font-semibold mb-4">Perfil da organização</h2>
       {mensagem && <div className="mb-4"><Alert type={mensagem.type}>{mensagem.text}</Alert></div>}
 
-      <Card className="mb-6">
-        <h3 className="font-semibold mb-3">Foto de capa</h3>
-        <div className="flex flex-col sm:flex-row items-start gap-4">
-          <div className="w-full sm:w-64 h-36 rounded-md overflow-hidden bg-purple-50 shrink-0">
-            {org.foto_url ? (
-              <img src={org.foto_url} alt="Capa da organização" className="w-full h-full object-cover" />
-            ) : (
-              <Building2 className="w-full h-full p-10 text-purple-200" aria-hidden="true" />
-            )}
-          </div>
-          <div>
-            <Button type="button" variant="secondary" loading={enviandoFoto} onClick={() => inputFoto.current?.click()}>
-              <ImagePlus size={18} aria-hidden="true" /> Trocar foto
-            </Button>
-            <p className="text-xs text-gray-500 mt-2">JPG, PNG ou WEBP de até 5 MB. Formato horizontal fica melhor.</p>
-            <input ref={inputFoto} type="file" accept={TIPOS_IMAGEM.join(',')} className="sr-only" onChange={(e) => trocarFoto(e.target.files?.[0])} aria-label="Selecionar foto de capa" />
-          </div>
+      <Card className="mb-6 space-y-6">
+        <div>
+          <h3 className="font-semibold mb-1">Logo</h3>
+          <p className="text-sm text-gray-600 mb-3">Identifica a organização na lista, na página pública e nos animais cadastrados.</p>
+          <EditorFotoIdentificacao
+            rotulo="logo"
+            temFoto={!!org.logo_url}
+            dica="Prefira uma imagem quadrada."
+            previa={
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-purple-50 border border-gray-200 shrink-0 flex items-center justify-center">
+                {org.logo_url ? (
+                  <img src={org.logo_url} alt="Logo da organização" className="w-full h-full object-contain bg-white" />
+                ) : (
+                  <Building2 className="w-10 h-10 text-purple-200" aria-hidden="true" />
+                )}
+              </div>
+            }
+            onTrocar={(arquivo) => trocarImagem('logo', arquivo)}
+            onRemover={() => removerImagem('logo')}
+          />
+        </div>
+        <div className="border-t border-gray-100 pt-6">
+          <h3 className="font-semibold mb-1">Foto de capa</h3>
+          <p className="text-sm text-gray-600 mb-3">Aparece no topo da página pública e no cartão da organização.</p>
+          <EditorFotoIdentificacao
+            rotulo="capa"
+            temFoto={!!org.foto_url}
+            dica="Formato horizontal fica melhor."
+            previa={
+              <div className="w-full sm:w-64 h-36 rounded-md overflow-hidden bg-purple-50 shrink-0">
+                {org.foto_url ? (
+                  <img src={org.foto_url} alt="Capa da organização" className="w-full h-full object-cover" />
+                ) : (
+                  <Building2 className="w-full h-full p-10 text-purple-200" aria-hidden="true" />
+                )}
+              </div>
+            }
+            onTrocar={(arquivo) => trocarImagem('capa', arquivo)}
+            onRemover={() => removerImagem('capa')}
+          />
         </div>
       </Card>
 

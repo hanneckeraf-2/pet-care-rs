@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, LayoutDashboard, LogOut, Menu, PawPrint, Settings, User, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import SinoNotificacoes from './SinoNotificacoes';
+import Avatar from './Avatar';
 import InstalarApp from './InstalarApp';
 
 const navItems = [
@@ -90,9 +91,7 @@ export default function Header() {
                 aria-haspopup="menu"
                 aria-expanded={menuUsuario}
               >
-                <span className="bg-purple-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold uppercase">
-                  {nome.charAt(0)}
-                </span>
+                <Avatar url={perfil?.foto_url} nome={nome} className="w-7 h-7 text-xs" />
                 {nome}
                 <ChevronDown size={16} aria-hidden="true" />
               </button>
@@ -150,6 +149,9 @@ export default function Header() {
           <div className="border-t border-gray-100 mt-2 pt-2 flex flex-col gap-1">
             {user ? (
               <>
+                <div className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-gray-800">
+                  <Avatar url={perfil?.foto_url} nome={nome} className="w-8 h-8 text-xs" /> {nome}
+                </div>
                 {itensUsuario.map(({ to, label }) => (
                   <NavLink key={to} to={to} className={linkClass}>{label}</NavLink>
                 ))}

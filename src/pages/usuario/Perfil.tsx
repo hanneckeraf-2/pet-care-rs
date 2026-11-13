@@ -12,6 +12,9 @@ import { TIPO_SOLICITACAO, fotoPrincipal } from '../../lib/animais';
 import { useAuth } from '../../contexts/AuthContext';
 import { Alert, Button, Card, Field, Input, Select } from '../../components/ui';
 import Badge from '../../components/Badge';
+import Avatar from '../../components/Avatar';
+import EditorFotoIdentificacao from '../../components/EditorFotoIdentificacao';
+import { definirFotoIdentificacao, removerFotoIdentificacao } from '../../lib/upload';
 import type { Enums } from '../../types/database';
 
 const schema = z.object({
@@ -156,6 +159,29 @@ export default function Perfil() {
         {mensagem && <Alert type="success">{mensagem}</Alert>}
         {erro && <Alert type="error">{erro}</Alert>}
       </div>
+
+      {user && (
+        <Card className="mb-8">
+          <h2 className="text-xl font-semibold mb-1">Foto de perfil</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Ajuda as organizações a reconhecer você nas solicitações de adoção, lar temporário e voluntariado.
+          </p>
+          <EditorFotoIdentificacao
+            rotulo="foto de perfil"
+            temFoto={!!perfil?.foto_url}
+            dica="Prefira uma foto de rosto, quadrada."
+            previa={<Avatar url={perfil?.foto_url} nome={perfil?.nome || user.email} className="w-24 h-24 text-3xl" alt="Sua foto de perfil" />}
+            onTrocar={async (arquivo) => {
+              await definirFotoIdentificacao(user.id, { tipo: 'perfil', idUsuario: user.id }, arquivo);
+              await recarregarPerfil();
+            }}
+            onRemover={async () => {
+              await removerFotoIdentificacao({ tipo: 'perfil', idUsuario: user.id });
+              await recarregarPerfil();
+            }}
+          />
+        </Card>
+      )}
 
       <Card className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Informações pessoais</h2>

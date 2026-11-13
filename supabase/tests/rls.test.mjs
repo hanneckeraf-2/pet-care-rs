@@ -275,6 +275,42 @@ await expectOk('adoção aprovada tira o animal do lar temporário', `select sta
 await db.exec(`select set_config('request.jwt.claim.sub', '', false);
                update public.usuario set id_organizacao=(select id from public.organizacao where nome='Abrigo Patas Unidas') where id='${U_ANA}';`);
 
+// ---- Fotos de identificação (perfil do usuário; logo e capa da organização) ----
+const patas = (await db.query(`select id from public.organizacao where nome='Abrigo Patas Unidas'`)).rows[0].id;
+const amigoFiel = (await db.query(`select id from public.organizacao where nome='ONG Amigo Fiel'`)).rows[0].id;
+await as(U_MARIA, async () => {
+  await expectOk('maria envia foto de perfil', `insert into public.foto (id_usuario,tipo,url,storage_path) values ('${U_MARIA}','perfil','https://x/p1.jpg','${U_MARIA}/perfil/p1.jpg') returning id`, (r) => r.length === 1);
+  await expectOk('foto de perfil aparece no usuário', `select foto_url from public.usuario where id='${U_MARIA}'`, (r) => r[0].foto_url === 'https://x/p1.jpg');
+  await expectErr('maria não tem duas fotos de perfil', `insert into public.foto (id_usuario,tipo,url) values ('${U_MARIA}','perfil','https://x/p2.jpg')`);
+  await expectErr('maria não envia foto de perfil de outro', `insert into public.foto (id_usuario,tipo,url) values ('${U_ANA}','perfil','https://x/p3.jpg')`);
+  await expectErr('maria não envia logo de organização', `insert into public.foto (id_organizacao,tipo,url) values (${patas},'logo','https://x/l.png')`);
+  await expectErr('foto de perfil não pode ser de animal', `insert into public.foto (id_animal,tipo,url) values ((select id from public.animal where nome='Mingau'),'perfil','https://x/a.jpg')`);
+  await expectErr('foto de usuário precisa de tipo', `insert into public.foto (id_usuario,url) values ('${U_MARIA}','https://x/s.jpg')`);
+  await expectOk('maria troca a foto de perfil', `update public.foto set url='https://x/p2.jpg' where id_usuario='${U_MARIA}' and tipo='perfil' returning id`, (r) => r.length === 1);
+  await expectOk('troca atualiza o usuário', `select foto_url from public.usuario where id='${U_MARIA}'`, (r) => r[0].foto_url === 'https://x/p2.jpg');
+  await expectErr('tipo da foto não muda', `update public.foto set tipo='logo' where id_usuario='${U_MARIA}' and tipo='perfil'`);
+});
+await as(U_ANA, async () => {
+  await expectOk('organização vê a foto de quem pediu adoção', `select foto_url from public.usuario where id='${U_MARIA}'`, (r) => r[0]?.foto_url === 'https://x/p2.jpg');
+  await expectOk('ana envia logo da sua ONG', `insert into public.foto (id_organizacao,tipo,url) values (${patas},'logo','https://x/logo.png') returning id`, (r) => r.length === 1);
+  await expectOk('ana envia capa da sua ONG', `insert into public.foto (id_organizacao,tipo,url) values (${patas},'capa','https://x/capa.jpg') returning id`, (r) => r.length === 1);
+  await expectErr('ana não envia logo de outra ONG', `insert into public.foto (id_organizacao,tipo,url) values (${amigoFiel},'logo','https://x/l2.png')`);
+  await expectErr('ana não tem dois logos', `insert into public.foto (id_organizacao,tipo,url) values (${patas},'logo','https://x/logo2.png')`);
+});
+await as(null, async () => {
+  await expectOk('anon vê logo e capa da organização', `select logo_url, foto_url from public.organizacao where id=${patas}`,
+    (r) => r[0].logo_url === 'https://x/logo.png' && r[0].foto_url === 'https://x/capa.jpg');
+  await expectErr('anon não envia foto', `insert into public.foto (id_organizacao,tipo,url) values (${patas},'logo','https://x/l3.png')`);
+});
+await as(U_ANA, async () => {
+  await expectOk('ana remove o logo', `delete from public.foto where id_organizacao=${patas} and tipo='logo' returning id`, (r) => r.length === 1);
+});
+await as(U_MARIA, async () => {
+  await expectOk('maria remove a foto de perfil', `delete from public.foto where id_usuario='${U_MARIA}' and tipo='perfil' returning id`, (r) => r.length === 1);
+});
+await expectOk('remoção limpa as URLs exibidas', `select (select logo_url from public.organizacao where id=${patas}) l, (select foto_url from public.organizacao where id=${patas}) c, (select foto_url from public.usuario where id='${U_MARIA}') p`,
+  (r) => r[0].l === null && r[0].c === 'https://x/capa.jpg' && r[0].p === null);
+
 await as(null, async () => {
   await expectErr('anon não exclui conta', `select public.excluir_minha_conta()`);
 });

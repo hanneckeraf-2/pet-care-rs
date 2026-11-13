@@ -7,6 +7,7 @@ import { CIDADES } from '../../lib/constants';
 import { STATUS_ADOTAVEIS } from '../../lib/animais';
 import { Alert, Input, Select } from '../../components/ui';
 import Spinner from '../../components/Spinner';
+import LogoOrganizacao from '../../components/LogoOrganizacao';
 
 type OrgResumo = {
   id: number;
@@ -14,6 +15,7 @@ type OrgResumo = {
   cidade: string;
   descricao: string | null;
   foto_url: string | null;
+  logo_url: string | null;
   animal: { count: number }[];
   vaga_voluntariado: { count: number }[];
 };
@@ -30,7 +32,7 @@ export default function ListaOrganizacoes() {
     setCarregando(true);
     let query = supabase
       .from('organizacao')
-      .select('id, nome, cidade, descricao, foto_url, animal(count), vaga_voluntariado(count)')
+      .select('id, nome, cidade, descricao, foto_url, logo_url, animal(count), vaga_voluntariado(count)')
       .in('animal.status', STATUS_ADOTAVEIS)
       .eq('vaga_voluntariado.status', 'aberta')
       .order('nome');
@@ -95,10 +97,15 @@ export default function ListaOrganizacoes() {
                 )}
               </div>
               <div className="p-5 flex flex-col flex-1">
-                <h2 className="text-xl font-semibold mb-1">{o.nome}</h2>
-                <p className="text-sm text-gray-500 flex items-center gap-1 mb-3">
-                  <MapPin size={14} aria-hidden="true" /> {o.cidade}
-                </p>
+                <div className="flex items-center gap-3 mb-3">
+                  <LogoOrganizacao url={o.logo_url} className="w-12 h-12" />
+                  <div>
+                    <h2 className="text-xl font-semibold">{o.nome}</h2>
+                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                      <MapPin size={14} aria-hidden="true" /> {o.cidade}
+                    </p>
+                  </div>
+                </div>
                 {o.descricao && <p className="text-gray-700 text-sm line-clamp-3 mb-4">{o.descricao}</p>}
                 <div className="mt-auto flex gap-4 text-sm text-purple-700 font-medium">
                   <span>{o.animal[0]?.count ?? 0} para adoção</span>
