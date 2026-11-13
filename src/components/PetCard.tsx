@@ -20,7 +20,7 @@ export default function PetCard({ animal, to, acao }: PetCardProps) {
     <article className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition flex flex-col">
       <Link to={destino} className="relative h-48 block bg-gray-100" tabIndex={-1} aria-hidden="true">
         {imagem ? (
-          <img src={imagem} alt="" className="w-full h-full object-cover" loading="lazy" />
+          <img src={imagem} alt="" className="w-full h-full object-contain" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-300">
             <PawPrint className="w-16 h-16" />

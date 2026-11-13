@@ -223,7 +223,7 @@ export default function AnimalForm() {
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4">
               {fotosExistentes.map((f) => (
                 <div key={f.id} className="relative aspect-square rounded-md overflow-hidden bg-gray-100">
-                  <img src={f.url} alt="" className="w-full h-full object-cover" />
+                  <img src={f.url} alt="" className="w-full h-full object-contain" />
                   <button
                     type="button"
                     onClick={() => removerFotoExistente(f)}

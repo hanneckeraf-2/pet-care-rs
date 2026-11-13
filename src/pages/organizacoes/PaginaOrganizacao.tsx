@@ -219,7 +219,7 @@ export default function PaginaOrganizacao() {
                   <Link key={a.id} to={`/animais/${a.id}`} className="group block bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
                     <div className="aspect-square bg-gray-100">
                       {foto ? (
-                        <img src={foto} alt={`Foto de ${a.nome}`} className="w-full h-full object-cover" loading="lazy" />
+                        <img src={foto} alt={`Foto de ${a.nome}`} className="w-full h-full object-contain" loading="lazy" />
                       ) : (
                         <PawPrint className="w-full h-full p-8 text-gray-300" aria-hidden="true" />
                       )}

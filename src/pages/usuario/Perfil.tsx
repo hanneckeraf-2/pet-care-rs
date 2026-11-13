@@ -248,7 +248,7 @@ export default function Perfil() {
                   <Link to={`/desaparecidos/${r.id}`} className="py-3 flex items-center gap-4 hover:bg-gray-50 -mx-2 px-2 rounded-md">
                     <div className="w-14 h-14 rounded-md overflow-hidden bg-gray-100 shrink-0">
                       {foto ? (
-                        <img src={foto} alt="" className="w-full h-full object-cover" />
+                        <img src={foto} alt="" className="w-full h-full object-contain" />
                       ) : (
                         <PawPrint className="w-full h-full p-3 text-gray-300" aria-hidden="true" />
                       )}

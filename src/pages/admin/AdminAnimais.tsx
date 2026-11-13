@@ -98,7 +98,7 @@ export default function AdminAnimais() {
             return (
               <li key={a.id} className="p-4 flex flex-wrap items-center gap-4">
                 <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 shrink-0">
-                  {foto ? <img src={foto} alt="" className="w-full h-full object-cover" /> : <PawPrint className="w-full h-full p-4 text-gray-300" aria-hidden="true" />}
+                  {foto ? <img src={foto} alt="" className="w-full h-full object-contain" /> : <PawPrint className="w-full h-full p-4 text-gray-300" aria-hidden="true" />}
                 </div>
                 <div className="flex-1 min-w-[160px]">
                   <Link to={`/animais/${a.id}`} className="font-semibold hover:text-purple-700">{a.nome}</Link>

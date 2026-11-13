@@ -174,7 +174,7 @@ export default function DetalheDesaparecido() {
         <div>
           <div className="aspect-[4/3] bg-gray-100 rounded-xl overflow-hidden shadow-md">
             {fotos.length > 0 ? (
-              <img src={fotos[fotoAtiva]?.url} alt={`Foto de ${registro.nome}`} className="w-full h-full object-cover" />
+              <img src={fotos[fotoAtiva]?.url} alt={`Foto de ${registro.nome}`} className="w-full h-full object-contain" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-300"><PawPrint className="w-24 h-24" aria-hidden="true" /></div>
             )}
@@ -185,10 +185,10 @@ export default function DetalheDesaparecido() {
                 <button
                   key={f.id}
                   onClick={() => setFotoAtiva(i)}
-                  className={`w-20 h-20 shrink-0 rounded-md overflow-hidden border-2 ${i === fotoAtiva ? 'border-purple-600' : 'border-transparent'}`}
+                  className={`w-20 h-20 shrink-0 rounded-md overflow-hidden bg-gray-100 border-2 ${i === fotoAtiva ? 'border-purple-600' : 'border-transparent'}`}
                   aria-label={`Ver foto ${i + 1}`}
                 >
-                  <img src={f.url} alt="" className="w-full h-full object-cover" />
+                  <img src={f.url} alt="" className="w-full h-full object-contain" />
                 </button>
               ))}
             </div>

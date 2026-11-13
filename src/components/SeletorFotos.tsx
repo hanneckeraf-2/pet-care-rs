@@ -44,7 +44,7 @@ export default function SeletorFotos({ arquivos, onChange, max = MAX_FOTOS }: Pr
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
         {previews.map((url, i) => (
           <div key={url} className="relative aspect-square rounded-md overflow-hidden bg-gray-100">
-            <img src={url} alt={`Pré-visualização da foto ${i + 1}`} className="w-full h-full object-cover" />
+            <img src={url} alt={`Pré-visualização da foto ${i + 1}`} className="w-full h-full object-contain" />
             {i === 0 && <span className="absolute bottom-1 left-1 bg-purple-600 text-white text-[10px] px-1.5 rounded">Principal</span>}
             <button
               type="button"
